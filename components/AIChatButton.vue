@@ -11,7 +11,7 @@
 
     <div class="chat-container" v-if="isOpen">
       <div class="chat-header">
-        <h5 class="mb-0">AI Assistant</h5>
+        <h5 class="mb-0">{{ $t("AIChatButton.chatHeader") }}</h5>
       </div>
       <div class="chat-messages" ref="messageContainer">
         <div class="message-list">
@@ -22,7 +22,7 @@
         <input
           type="text"
           class="form-control bg-white"
-          placeholder="Hỏi AI..."
+          :placeholder="$t('AIChatButton.askAI')"
           v-model="userInput"
           @keyup.enter="sendMessage"
         />

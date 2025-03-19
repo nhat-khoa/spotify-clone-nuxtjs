@@ -1,3 +1,5 @@
+Dùng vue-i18n thay vì @nuxt/i18n vì bị lỗi, nó ko đọc file vi.json trong locales mà chỉ đọc 1 file en.json
+
 # Nuxt Minimal Starter
 
 Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.

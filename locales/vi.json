@@ -1,0 +1,29 @@
+{
+  "sidebar": {
+    "home": "Trang chủ",
+    "music": "Âm nhạc",
+    "album": "Album",
+    "artists": "Nghệ sĩ",
+    "genres": "Thể loại",
+    "myAccount": "Tài khoản",
+    "profile": "Hồ sơ",
+    "favorites": "Yêu thích",
+    "history": "Lịch sử",
+    "premium": "Premium",
+    "logout": "Đăng xuất"
+  },
+  "header": {
+    "search": "Nhập để có kết quả tìm kiếm...",
+    "language": "Ngôn Ngữ",
+    "selectLanguage": "Chọn 1 ngôn ngữ để hiện thị",
+    "en": "Tiếng Anh",
+    "vi": "Tiếng Việt",
+    "profile": "Hồ sơ",
+    "favorites": "Yêu thích",
+    "logout": "Đăng xuất"
+  },
+  "AIChatButton": {
+    "chatHeader": "Trợ lý AI",
+    "askAI": "Hỏi AI"
+  }
+}

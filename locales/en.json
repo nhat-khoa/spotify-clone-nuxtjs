@@ -1,0 +1,29 @@
+{
+  "sidebar": {
+    "home": "Home",
+    "music": "Music",
+    "album": "Album",
+    "artists": "Artists",
+    "genres": "Genres",
+    "myAccount": "My Account",
+    "profile": "Profile",
+    "favorites": "Favorites",
+    "history": "History",
+    "premium": "Premium",
+    "logout": "Logout"
+  },
+  "header": {
+    "search": "Type anything to get result...",
+    "language": "Language",
+    "selectLanguage": "Select a language to display",
+    "en": "English",
+    "vi": "Vietnamese",
+    "profile": "Profile",
+    "favorites": "Favorites",
+    "logout": "Logout"
+  },
+  "AIChatButton": {
+    "chatHeader": "AI Assistant",
+    "askAI": "Ask AI"
+  }
+}

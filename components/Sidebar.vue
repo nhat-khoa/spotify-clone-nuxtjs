@@ -21,7 +21,7 @@
               exact-active-class="active"
             >
               <i class="ri-home-4-line fs-5"></i>
-              <span class="ps-3">Home</span>
+              <span class="ps-3">{{ $t("sidebar.home") }}</span>
             </NuxtLink>
           </li>
           <li class="nav-item">
@@ -31,7 +31,7 @@
               exact-active-class="active"
             >
               <i class="ri-music-2-line fs-5"></i>
-              <span class="ps-3">Music</span>
+              <span class="ps-3">{{ $t("sidebar.music") }}</span>
             </NuxtLink>
           </li>
           <li class="nav-item">
@@ -41,7 +41,7 @@
               exact-active-class="active"
             >
               <i class="ri-album-line fs-5"></i>
-              <span class="ps-3">Album</span>
+              <span class="ps-3">{{ $t("sidebar.album") }}</span>
             </NuxtLink>
           </li>
           <li class="nav-item">
@@ -51,7 +51,7 @@
               exact-active-class="active"
             >
               <i class="ri-mic-line fs-5"></i>
-              <span class="ps-3">Artists</span>
+              <span class="ps-3">{{ $t("sidebar.artists") }}</span>
             </NuxtLink>
           </li>
           <li class="nav-item">
@@ -61,11 +61,13 @@
               exact-active-class="active"
             >
               <i class="ri-disc-line fs-5"></i>
-              <span class="ps-3">Genres</span>
+              <span class="ps-3">{{ $t("sidebar.genres") }}</span>
             </NuxtLink>
           </li>
           <li class="nav-item nav-item--head">
-            <span class="nav-item--head__text">My Account</span>
+            <span class="nav-item--head__text">{{
+              $t("sidebar.myAccount")
+            }}</span>
             <span class="nav-item--head__dots">...</span>
           </li>
           <li class="nav-item">
@@ -75,7 +77,7 @@
               exact-active-class="active"
             >
               <i class="ri-user-line fs-5"></i>
-              <span class="ps-3">Profile</span>
+              <span class="ps-3">{{ $t("sidebar.profile") }}</span>
             </NuxtLink>
           </li>
           <li class="nav-item">
@@ -85,7 +87,7 @@
               exact-active-class="active"
             >
               <i class="ri-heart-line fs-5"></i>
-              <span class="ps-3">Favorites</span>
+              <span class="ps-3">{{ $t("sidebar.favorites") }}</span>
             </NuxtLink>
           </li>
           <li class="nav-item">
@@ -95,7 +97,7 @@
               exact-active-class="active"
             >
               <i class="ri-history-line fs-5"></i>
-              <span class="ps-3">History</span>
+              <span class="ps-3">{{ $t("sidebar.history") }}</span>
             </NuxtLink>
           </li>
           <li class="nav-item">
@@ -105,7 +107,7 @@
               exact-active-class="active"
             >
               <i class="ri-vip-crown-line fs-5"></i>
-              <span class="ps-3">Premium</span>
+              <span class="ps-3">{{ $t("sidebar.premium") }}</span>
             </NuxtLink>
           </li>
         </ul>
@@ -115,11 +117,21 @@
       <NuxtLink to="/login" class="btn btn-danger d-flex">
         <div class="btn__wrap">
           <i class="ri-logout-box-line"></i>
-          <span class="ms-2">Logout</span>
+          <span class="ms-2">{{ $t("sidebar.logout") }}</span>
         </div>
       </NuxtLink>
     </div>
   </aside>
 </template>
 
-<script setup></script>
+<script setup>
+// const { locale } = useI18n();
+
+// // Khôi phục locale từ localStorage khi component mounted
+// onMounted(() => {
+//   const savedLocale = localStorage.getItem("user-locale");
+//   if (savedLocale) {
+//     locale.value = savedLocale;
+//   }
+// });
+</script>

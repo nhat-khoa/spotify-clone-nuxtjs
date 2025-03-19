@@ -13,7 +13,7 @@
             <label for="search_input"><i class="ri-search-2-line"></i></label>
             <input
               type="text"
-              placeholder="Type anything to get result..."
+              :placeholder="$t('header.search')"
               id="search_input"
               class="form-control form-control-sm"
             />
@@ -313,14 +313,18 @@
                 data-bs-toggle="dropdown"
               >
                 <i class="ri-earth-line fs-5"></i>
-                <span class="d-none d-md-block ms-1"> Language </span>
+                <span class="d-none d-md-block ms-1">
+                  {{ $t("header.language") }}
+                </span>
               </a>
               <div
                 class="dropdown-menu dropdown-menu-lg dropdown-menu-end"
                 aria-labelledby="language_menu"
               >
                 <div class="py-2 px-4">
-                  <span class="d-block fw-bold">Select a language</span>
+                  <span class="d-block fw-bold">
+                    {{ $t("header.selectLanguage") }}
+                  </span>
                 </div>
                 <div class="dropdown-divider"></div>
                 <div class="d-flex flex-wrap py-2">
@@ -332,10 +336,11 @@
                         name="language"
                         id="english"
                         value="en"
-                        checked
+                        :checked="locale === 'en'"
+                        @change="switchLanguage('en')"
                       />
                       <label class="form-check-label fw-semibold" for="english">
-                        English
+                        {{ $t("header.en") }}
                       </label>
                     </div>
                   </div>
@@ -347,12 +352,14 @@
                         name="language"
                         id="vietnamese"
                         value="vi"
+                        :checked="locale === 'vi'"
+                        @change="switchLanguage('vi')"
                       />
                       <label
                         class="form-check-label fw-semibold"
                         for="vietnamese"
                       >
-                        Vietnamese
+                        {{ $t("header.vi") }}
                       </label>
                     </div>
                   </div>
@@ -396,7 +403,7 @@
                     to="/profile"
                   >
                     <i class="ri-user-3-line fs-5"></i>
-                    <span class="ps-2">Profile</span>
+                    <span class="ps-2">{{ $t("header.profile") }}</span>
                   </NuxtLink>
                 </li>
                 <li>
@@ -405,7 +412,7 @@
                     to="/favorite"
                   >
                     <i class="ri-heart-line fs-5"></i>
-                    <span class="ps-2">Favorites</span>
+                    <span class="ps-2">{{ $t("header.favorites") }}</span>
                   </NuxtLink>
                 </li>
                 <li class="dropdown-divider"></li>
@@ -415,7 +422,7 @@
                     to="/login"
                   >
                     <i class="ri-logout-circle-line fs-5"></i>
-                    <span class="ps-2"> Logout </span>
+                    <span class="ps-2"> {{ $t("header.logout") }} </span>
                   </NuxtLink>
                 </li>
               </ul>
@@ -427,6 +434,22 @@
   </header>
 </template>
 
-<script setup></script>
+<script setup>
+import { useI18n } from "vue-i18n";
+const { locale } = useI18n();
+
+// // Khôi phục locale từ localStorage khi component mounted
+// onMounted(() => {
+//   const savedLocale = localStorage.getItem("user-locale");
+//   if (savedLocale) {
+//     locale.value = savedLocale;
+//   }
+// });
+
+const switchLanguage = (lang) => {
+  locale.value = lang;
+  // localStorage.setItem("user-locale", lang);
+};
+</script>
 
 <style></style>
