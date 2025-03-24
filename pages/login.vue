@@ -64,19 +64,28 @@
 </template>
 
 <script setup>
+import { useToast } from "vue-toastification";
+
 definePageMeta({
   layout: "auth",
 });
 
 const { $googleSignIn } = useNuxtApp();
+const toast = useToast();
 
 const handleGoogleLogin = async () => {
-  try {
-    google.accounts.id.disableAutoSelect(); // Reset trạng thái tài khoản cũ
-    await $googleSignIn(); // Chờ Google xử lý
-  } catch (error) {
-    console.error("Đăng nhập thất bại:", error);
-  }
+  toast.success("Đăng nhập thành công!");
+  toast.error("Đăng nhập thành công!");
+  toast.warning("Đăng nhập thành công!");
+  toast.info("Đăng nhập thành công!");
+  toast("Đăng nhập thành công!");
+  // try {
+  //   google.accounts.id.disableAutoSelect(); // Reset trạng thái tài khoản cũ
+  //   await $googleSignIn(); // Chờ Google xử lý
+  //   toast.success("Đăng nhập thành công!");
+  // } catch (error) {
+  //   toast.error("Đăng nhập thất bại:", error);
+  // }
 };
 </script>
 

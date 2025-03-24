@@ -9,7 +9,14 @@ export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
 
-  css: ["~/assets/css/plugins.bundle.css", "~/assets/css/styles.bundle.css"],
+  css: [
+    "~/assets/css/plugins.bundle.css",
+    "~/assets/css/styles.bundle.css",
+    "vue-toastification/dist/index.css",
+  ],
+
+  // plugins: ["~/plugins/toast.client.js"],
+
   app: {
     baseURL: "/",
     head: {
