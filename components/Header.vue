@@ -417,13 +417,13 @@
                 </li>
                 <li class="dropdown-divider"></li>
                 <li>
-                  <NuxtLink
+                  <button
                     class="dropdown-item d-flex align-items-center external text-danger"
-                    to="/login"
+                    @click="logout"
                   >
                     <i class="ri-logout-circle-line fs-5"></i>
                     <span class="ps-2"> {{ $t("header.logout") }} </span>
-                  </NuxtLink>
+                  </button>
                 </li>
               </ul>
             </div>
@@ -436,19 +436,17 @@
 
 <script setup>
 import { useI18n } from "vue-i18n";
-const { locale } = useI18n();
+import Cookies from "js-cookie";
 
-// // Khôi phục locale từ localStorage khi component mounted
-// onMounted(() => {
-//   const savedLocale = localStorage.getItem("user-locale");
-//   if (savedLocale) {
-//     locale.value = savedLocale;
-//   }
-// });
+const { locale } = useI18n();
 
 const switchLanguage = (lang) => {
   locale.value = lang;
-  // localStorage.setItem("user-locale", lang);
+};
+
+const logout = () => {
+  Cookies.remove("access_token"); // Xóa token khỏi cookie
+  navigateTo("/login"); // Chuyển hướng về trang login
 };
 </script>
 

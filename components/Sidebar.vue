@@ -114,24 +114,21 @@
       </nav>
     </div>
     <div class="sidebar-foot">
-      <NuxtLink to="/login" class="btn btn-danger d-flex">
+      <button class="btn btn-danger w-100" @click="logout">
         <div class="btn__wrap">
           <i class="ri-logout-box-line"></i>
           <span class="ms-2">{{ $t("sidebar.logout") }}</span>
         </div>
-      </NuxtLink>
+      </button>
     </div>
   </aside>
 </template>
 
 <script setup>
-// const { locale } = useI18n();
+import Cookies from "js-cookie";
 
-// // Khôi phục locale từ localStorage khi component mounted
-// onMounted(() => {
-//   const savedLocale = localStorage.getItem("user-locale");
-//   if (savedLocale) {
-//     locale.value = savedLocale;
-//   }
-// });
+const logout = () => {
+  Cookies.remove("access_token"); // Xóa token khỏi cookie
+  navigateTo("/login"); // Chuyển hướng về login
+};
 </script>
