@@ -65,6 +65,7 @@
 
 <script setup>
 import { useToast } from "vue-toastification";
+import Cookies from "js-cookie";
 
 definePageMeta({
   layout: "auth",
@@ -74,19 +75,45 @@ const { $googleSignIn } = useNuxtApp();
 const toast = useToast();
 
 const handleGoogleLogin = async () => {
-  toast.success("Đăng nhập thành công!");
-  toast.error("Đăng nhập thành công!");
-  toast.warning("Đăng nhập thành công!");
-  toast.info("Đăng nhập thành công!");
-  toast("Đăng nhập thành công!");
-  // try {
-  //   google.accounts.id.disableAutoSelect(); // Reset trạng thái tài khoản cũ
-  //   await $googleSignIn(); // Chờ Google xử lý
-  //   toast.success("Đăng nhập thành công!");
-  // } catch (error) {
-  //   toast.error("Đăng nhập thất bại:", error);
-  // }
+  try {
+    google.accounts.id.disableAutoSelect(); // Reset trạng thái tài khoản cũ
+    const credential = await $googleSignIn();
+    console.log("credential nhận được từ google:", credential);
+    await loginWithGoogle(credential);
+  } catch (error) {
+    toast.error("Đăng nhập thất bại!");
+  }
 };
+
+// Hàm gửi token Google lên Django để xác thực và lấy thông tin người dùng
+async function loginWithGoogle(credential) {
+  try {
+    const response = await fetch(
+      "http://127.0.0.1:8000/api/auth/google-login/",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Lưu access_token vào cookie với thời gian hết hạn là 1 ngày
+      Cookies.set("access_token", data.access_token, {
+        expires: 1,
+        secure: false, //true chỉ hoạt động trên HTTPS
+      });
+      console.log("data response:", data);
+      navigateTo("/home"); // Chuyển hướng sau khi đăng nhập thành công
+    } else {
+      console.error("Login failed:", data);
+    }
+  } catch (error) {
+    console.error("Error during login:", error);
+  }
+}
 </script>
 
 <style></style>
