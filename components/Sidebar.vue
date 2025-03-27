@@ -16,6 +16,7 @@
         <ul class="navbar-nav">
           <li class="nav-item">
             <NuxtLink
+              replace
               to="/home"
               class="nav-link d-flex align-items-center"
               exact-active-class="active"
@@ -26,6 +27,7 @@
           </li>
           <li class="nav-item">
             <NuxtLink
+              replace
               to="/music"
               class="nav-link d-flex align-items-center"
               exact-active-class="active"
@@ -36,6 +38,7 @@
           </li>
           <li class="nav-item">
             <NuxtLink
+              replace
               to="/album"
               class="nav-link d-flex align-items-center"
               exact-active-class="active"
@@ -46,6 +49,7 @@
           </li>
           <li class="nav-item">
             <NuxtLink
+              replace
               to="/artist"
               class="nav-link d-flex align-items-center"
               exact-active-class="active"
@@ -56,6 +60,7 @@
           </li>
           <li class="nav-item">
             <NuxtLink
+              replace
               to="/genre"
               class="nav-link d-flex align-items-center"
               exact-active-class="active"
@@ -72,6 +77,7 @@
           </li>
           <li class="nav-item">
             <NuxtLink
+              replace
               to="/profile"
               class="nav-link d-flex align-items-center"
               exact-active-class="active"
@@ -82,6 +88,7 @@
           </li>
           <li class="nav-item">
             <NuxtLink
+              replace
               to="/favorite"
               class="nav-link d-flex align-items-center"
               exact-active-class="active"
@@ -92,6 +99,7 @@
           </li>
           <li class="nav-item">
             <NuxtLink
+              replace
               to="/history"
               class="nav-link d-flex align-items-center"
               exact-active-class="active"
@@ -102,6 +110,7 @@
           </li>
           <li class="nav-item">
             <NuxtLink
+              replace
               to="/premium"
               class="nav-link d-flex align-items-center"
               exact-active-class="active"
