@@ -81,7 +81,8 @@ const handleGoogleLogin = async () => {
     console.log("credential nhận được từ google:", credential);
     await loginWithGoogle(credential);
   } catch (error) {
-    toast.error("Đăng nhập thất bại!");
+    toast.error("Login google failed!");
+    console.error("Login google failed!", error);
   }
 };
 
@@ -106,12 +107,15 @@ async function loginWithGoogle(credential) {
         secure: false, //true chỉ hoạt động trên HTTPS
       });
       console.log("data response:", data);
+      toast.success("Login success!");
       navigateTo("/home"); // Chuyển hướng sau khi đăng nhập thành công
     } else {
       console.error("Login failed:", data);
+      toast.error("Login failed!" + data);
     }
   } catch (error) {
     console.error("Error during login:", error);
+    toast.error("Error during login:" + error);
   }
 }
 </script>
