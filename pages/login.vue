@@ -66,6 +66,7 @@
 <script setup>
 import { useToast } from "vue-toastification";
 import Cookies from "js-cookie";
+import { useUserStore } from "~/stores/user";
 
 definePageMeta({
   layout: "auth",
@@ -73,6 +74,7 @@ definePageMeta({
 
 const { $googleSignIn } = useNuxtApp();
 const toast = useToast();
+const userStore = useUserStore();
 
 const handleGoogleLogin = async () => {
   try {
@@ -99,6 +101,7 @@ async function loginWithGoogle(credential) {
     );
 
     const data = await response.json();
+    console.log("data response:", data);
 
     if (response.ok) {
       // Lưu access_token vào cookie với thời gian hết hạn là 1 ngày
@@ -106,7 +109,15 @@ async function loginWithGoogle(credential) {
         expires: 1,
         secure: false, //true chỉ hoạt động trên HTTPS
       });
-      console.log("data response:", data);
+
+      // Lưu thông tin user vào Pinia & localStorage
+      userStore.setUser({
+        id: data.user.id,
+        email: data.user.email,
+        full_name: data.user.full_name,
+        avatar_url: data.user.avatar_url,
+      });
+
       toast.success("Login success!");
       navigateTo("/home"); // Chuyển hướng sau khi đăng nhập thành công
     } else {

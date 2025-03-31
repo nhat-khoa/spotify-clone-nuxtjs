@@ -376,10 +376,12 @@
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                <div class="avatar__image">
-                  <img src="/images/users/thumb.jpg" alt="user" />
+                <div v-if="userStore.isLoaded" class="avatar__image">
+                  <img :src="userStore.user.avatar_url" alt="user" />
                 </div>
-                <span class="ps-2 d-none d-sm-block">Androws</span>
+                <span v-if="userStore.isLoaded" class="ps-2 d-none d-sm-block">
+                  {{ userStore.user.full_name }}
+                </span>
               </a>
               <ul
                 class="dropdown-menu dropdown-menu-md dropdown-menu-end"
@@ -387,11 +389,13 @@
               >
                 <li>
                   <div class="py-2 px-3 avatar avatar--lg">
-                    <div class="avatar__image">
-                      <img src="/images/users/thumb.jpg" alt="user" />
+                    <div v-if="userStore.isLoaded" class="avatar__image">
+                      <img :src="userStore.user.avatar_url" alt="user" />
                     </div>
                     <div class="avatar__content">
-                      <span class="avatar__title">Androws Kinny</span>
+                      <span v-if="userStore.isLoaded" class="avatar__title">
+                        {{ userStore.user.full_name }}
+                      </span>
                       <span class="avatar__subtitle">Artist</span>
                     </div>
                   </div>
@@ -437,8 +441,15 @@
 <script setup>
 import { useI18n } from "vue-i18n";
 import Cookies from "js-cookie";
+import { useUserStore } from "~/stores/user";
 
 const { locale } = useI18n();
+const userStore = useUserStore();
+
+// Chỉ load user khi component đã mounted (để đảm bảo chạy trên client)
+onMounted(() => {
+  userStore.loadUserFromLocalStorage();
+});
 
 const switchLanguage = (lang) => {
   locale.value = lang;
@@ -446,6 +457,7 @@ const switchLanguage = (lang) => {
 
 const logout = () => {
   Cookies.remove("access_token"); // Xóa token khỏi cookie
+  userStore.logout();
   navigateTo("/login"); // Chuyển hướng về trang login
 };
 </script>

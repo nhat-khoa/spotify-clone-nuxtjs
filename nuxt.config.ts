@@ -15,7 +15,7 @@ export default defineNuxtConfig({
     "vue-toastification/dist/index.css",
   ],
 
-  // plugins: ["~/plugins/toast.client.js"],
+  modules: ["@pinia/nuxt"],
 
   app: {
     baseURL: "/",
