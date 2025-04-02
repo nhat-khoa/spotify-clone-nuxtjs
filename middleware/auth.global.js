@@ -1,44 +1,40 @@
-import Cookies from "js-cookie";
+import { useUserStore } from "~/stores/user";
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
-    const publicPages = ["/login", "/register"];
-    if (publicPages.includes(to.path)) return;
+    const userStore = useUserStore();
 
-    let token;
-
-    if (process.server) {
-        // ✅ Lấy token từ cookie khi chạy trên server
-        const headers = useRequestHeaders(["cookie"]);
-        token = headers?.cookie
-            ?.split("; ")
-            .find(row => row.startsWith("access_token="))
-            ?.split("=")[1];
-    } else {
-        // ✅ Lấy token từ cookie khi chạy trên client
-        token = Cookies.get("access_token");
+    // Kiểm tra nếu dữ liệu chưa được load từ localStorage thì load
+    if (!userStore.isLoaded) {
+        userStore.loadUserFromLocalStorage();
     }
 
-    console.log("Token: ", token);
+    const accessToken = userStore.user.access_token; // Lấy access_token trực tiếp từ user
 
-    if (!token) {
+    const publicPages = ["/login", "/register"];
+
+    if (to.path === "/") return navigateTo("/home", { replace: true });
+
+    // Nếu đã login mà vào /login hoặc /register => Redirect về trang chính
+    if (accessToken && publicPages.includes(to.path)) {
+        return navigateTo("/home", { replace: true });
+    }
+
+    // Nếu là trang public thì không cần check tiếp
+    if (publicPages.includes(to.path)) return;
+
+    // Nếu không có token, chuyển hướng đến trang login
+    if (!accessToken) {
         return navigateTo("/login", { replace: true });
     }
 
+    // Kiểm tra token có hợp lệ không bằng API
     try {
-        const headers = {};
-
-        if (process.server) {
-            // ✅ Gửi cookie trong headers khi chạy trên server
-            const reqHeaders = useRequestHeaders(["cookie"]);
-            if (reqHeaders.cookie) {
-                headers["Cookie"] = reqHeaders.cookie;
-            }
-        }
-
         const response = await fetch("http://localhost:8000/api/auth/verify/", {
             method: "POST",
-            credentials: "include", // ✅ Giữ cookie khi chạy trên client
-            headers, // ✅ Thêm headers chứa cookie khi chạy trên server
+            headers: {
+                "Authorization": `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+            },
         });
 
         if (!response.ok) {
@@ -46,7 +42,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         }
     } catch (error) {
         console.error("Lỗi xác thực:", error);
-        if (process.client) Cookies.remove("access_token");
+        toast.error("Lỗi xác thực: " + error);
         return navigateTo("/login", { replace: true });
     }
 });

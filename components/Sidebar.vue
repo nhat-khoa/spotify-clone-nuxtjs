@@ -134,13 +134,11 @@
 </template>
 
 <script setup>
-import Cookies from "js-cookie";
 import { useUserStore } from "~/stores/user";
 
 const userStore = useUserStore();
 
 const logout = () => {
-  Cookies.remove("access_token"); // Xóa token khỏi cookie
   userStore.logout();
   navigateTo("/login"); // Chuyển hướng về login
 };

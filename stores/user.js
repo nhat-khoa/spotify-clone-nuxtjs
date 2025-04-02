@@ -6,35 +6,32 @@ export const useUserStore = defineStore('user', () => {
         id: '',
         email: '',
         full_name: '',
-        avatar_url: ''
+        avatar_google_url: '',
+        access_token: ''
     })
 
-    const isLoaded = ref(false) // Ban đầu là false
+    const isLoaded = ref(false)
 
-    // Chỉ load từ localStorage khi gọi hàm này (không gọi tự động)
     const loadUserFromLocalStorage = () => {
-        if (typeof window !== 'undefined') { // Kiểm tra có chạy trên client không
-            const storedUser = localStorage.getItem('user')
-            if (storedUser) {
-                user.value = JSON.parse(storedUser)
-            }
-            isLoaded.value = true // Đánh dấu đã load xong
+        const storedUser = localStorage.getItem('user')
+        if (storedUser) {
+            user.value = JSON.parse(storedUser)
         }
+        isLoaded.value = true // Đánh dấu đã load xong
     }
 
     const setUser = (newUser) => {
         user.value = newUser
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('user', JSON.stringify(newUser))
-        }
+        localStorage.setItem('user', JSON.stringify(newUser))
     }
 
     const logout = () => {
         user.value = { id: '', email: '', full_name: '', avatar_url: '' }
-        if (typeof window !== 'undefined') {
-            localStorage.removeItem('user')
-        }
+        localStorage.removeItem('user')
     }
+
+    // Getter lấy access_token
+    const accessToken = computed(() => user.value.access_token)
 
     return { user, isLoaded, setUser, logout, loadUserFromLocalStorage }
 })

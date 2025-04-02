@@ -104,18 +104,13 @@ async function loginWithGoogle(credential) {
     console.log("data response:", data);
 
     if (response.ok) {
-      // Lưu access_token vào cookie với thời gian hết hạn là 1 ngày
-      Cookies.set("access_token", data.access_token, {
-        expires: 1,
-        secure: false, //true chỉ hoạt động trên HTTPS
-      });
-
       // Lưu thông tin user vào Pinia & localStorage
       userStore.setUser({
         id: data.user.id,
         email: data.user.email,
         full_name: data.user.full_name,
-        avatar_url: data.user.avatar_url,
+        avatar_google_url: data.user.avatar_google_url,
+        access_token: data.access_token,
       });
 
       toast.success("Login success!");

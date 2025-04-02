@@ -377,7 +377,7 @@
                 aria-expanded="false"
               >
                 <div v-if="userStore.isLoaded" class="avatar__image">
-                  <img :src="userStore.user.avatar_url" alt="user" />
+                  <img :src="userStore.user.avatar_google_url" alt="user" />
                 </div>
                 <span v-if="userStore.isLoaded" class="ps-2 d-none d-sm-block">
                   {{ userStore.user.full_name }}
@@ -440,7 +440,6 @@
 
 <script setup>
 import { useI18n } from "vue-i18n";
-import Cookies from "js-cookie";
 import { useUserStore } from "~/stores/user";
 
 const { locale } = useI18n();
@@ -456,7 +455,6 @@ const switchLanguage = (lang) => {
 };
 
 const logout = () => {
-  Cookies.remove("access_token"); // Xóa token khỏi cookie
   userStore.logout();
   navigateTo("/login"); // Chuyển hướng về trang login
 };
