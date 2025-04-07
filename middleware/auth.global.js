@@ -8,22 +8,15 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         userStore.loadUserFromLocalStorage();
     }
 
-    const accessToken = userStore.user.access_token; // Lấy access_token trực tiếp từ user
+    const accessToken = userStore.user.access_token;
 
     const publicPages = ["/login", "/register"];
-
-    if (to.path === "/") return navigateTo("/home", { replace: true });
-
-    // Nếu đã login mà vào /login hoặc /register => Redirect về trang chính
-    if (accessToken && publicPages.includes(to.path)) {
-        return navigateTo("/home", { replace: true });
-    }
 
     // Nếu là trang public thì không cần check tiếp
     if (publicPages.includes(to.path)) return;
 
     // Nếu không có token, chuyển hướng đến trang login
-    if (!accessToken) {
+    if (!accessToken && accessToken == '') {
         return navigateTo("/login", { replace: true });
     }
 
@@ -38,11 +31,13 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         });
 
         if (!response.ok) {
-            throw new Error("Token không hợp lệ");
+            userStore.logout();
+            return navigateTo("/login", { replace: true });
         }
+        return;
     } catch (error) {
+        userStore.logout();
         console.error("Lỗi xác thực:", error);
-        toast.error("Lỗi xác thực: " + error);
         return navigateTo("/login", { replace: true });
     }
 });

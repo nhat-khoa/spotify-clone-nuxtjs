@@ -390,7 +390,7 @@
                 <li>
                   <div class="py-2 px-3 avatar avatar--lg">
                     <div v-if="userStore.isLoaded" class="avatar__image">
-                      <img :src="userStore.user.avatar_url" alt="user" />
+                      <img :src="userStore.user.avatar_google_url" alt="user" />
                     </div>
                     <div class="avatar__content">
                       <span v-if="userStore.isLoaded" class="avatar__title">

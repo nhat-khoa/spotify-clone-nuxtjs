@@ -26,7 +26,10 @@ export const useUserStore = defineStore('user', () => {
     }
 
     const logout = () => {
-        user.value = { id: '', email: '', full_name: '', avatar_url: '' }
+        user.value = {
+            id: '', email: '', full_name: '',
+            avatar_google_url: '', access_token: ''
+        }
         localStorage.removeItem('user')
     }
 
