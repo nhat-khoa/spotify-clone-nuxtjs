@@ -72,56 +72,50 @@ definePageMeta({
   layout: "auth",
 });
 
-const { $googleSignIn } = useNuxtApp();
+const { $googleSignIn, $axios } = useNuxtApp();
 const toast = useToast();
 const userStore = useUserStore();
 
 const handleGoogleLogin = async () => {
   try {
-    google.accounts.id.disableAutoSelect(); // Reset trạng thái tài khoản cũ
+    google.accounts.id.disableAutoSelect();
     const credential = await $googleSignIn();
     console.log("credential nhận được từ google:", credential);
     await loginWithGoogle(credential);
   } catch (error) {
-    toast.error("Login google failed!");
-    console.error("Login google failed!", error);
+    toast.error("Login Google failed!");
+    console.error("Login Google failed!", error);
   }
 };
 
-// Hàm gửi token Google lên Django để xác thực và lấy thông tin người dùng
 async function loginWithGoogle(credential) {
   try {
-    const response = await fetch(
-      "http://127.0.0.1:8000/api/auth/google-login/",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential }),
-      }
-    );
+    const response = await $axios.post("/api/auth/google-login/", {
+      credential,
+    });
+    const data = response.data;
 
-    const data = await response.json();
     console.log("data response:", data);
 
-    if (response.ok) {
-      // Lưu thông tin user vào Pinia & localStorage
-      userStore.setUser({
-        id: data.user.id,
-        email: data.user.email,
-        full_name: data.user.full_name,
-        avatar_google_url: data.user.avatar_google_url,
-        access_token: data.access_token,
-      });
+    // Lưu thông tin user vào Pinia & localStorage
+    userStore.setUser({
+      id: data.user.id,
+      email: data.user.email,
+      full_name: data.user.full_name,
+      avatar_google_url: data.user.avatar_google_url,
+      access_token: data.access_token,
+    });
 
-      toast.success("Login success!");
-      navigateTo("/home"); // Chuyển hướng sau khi đăng nhập thành công
-    } else {
-      console.error("Login failed:", data);
-      toast.error("Login failed!" + data);
-    }
+    toast.success("Login success!");
+    navigateTo("/home");
   } catch (error) {
     console.error("Error during login:", error);
-    toast.error("Error during login:" + error);
+
+    if (error.response?.data) {
+      toast.error("Login failed: " + JSON.stringify(error.response.data));
+    } else {
+      toast.error("Login failed: " + error.message);
+    }
   }
 }
 </script>
