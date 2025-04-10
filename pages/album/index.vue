@@ -21,19 +21,7 @@
       <div class="list list--lg">
         <div class="row">
           <div class="col-xl-6">
-            <Album />
-          </div>
-          <div class="col-xl-6">
-            <Album />
-          </div>
-          <div class="col-xl-6">
-            <Album />
-          </div>
-          <div class="col-xl-6">
-            <Album />
-          </div>
-          <div class="col-xl-6">
-            <Album />
+            <!-- <Album /> -->
           </div>
         </div>
       </div>

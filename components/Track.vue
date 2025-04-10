@@ -15,30 +15,32 @@
       </a>
     </div>
     <div class="list__content">
-      <NuxtLink to="/music/1" class="list__title text-truncate">
-        Sadness inside
+      <NuxtLink :to="`/track/${track.id}`" class="list__title text-truncate">
+        {{ track.title }}
       </NuxtLink>
       <p class="list__subtitle text-truncate">
-        <NuxtLink to="/artist/1"> Karen Jennings </NuxtLink>
+        <NuxtLink :to="`/artist/${track.artist.id}`">
+          {{ track.artist.name }}
+        </NuxtLink>
       </p>
     </div>
     <ul class="list__option">
-      <li>
-        <span class="badge rounded-pill bg-info"
-          ><i class="ri-vip-crown-fill"></i
-        ></span>
-      </li>
+      <!-- <li>
+        <span class="badge rounded-pill bg-info">
+          <i class="ri-vip-crown-fill"></i>
+        </span>
+      </li> -->
       <li>
         <a
           role="button"
           class="d-inline-flex"
           aria-label="Favorite"
           data-favorite-id="8"
-          ><i class="ri-heart-line heart-empty"></i>
-          <i class="ri-heart-fill heart-fill"></i
-        ></a>
+        >
+          <i class="ri-heart-fill" style="color: red; font-size: 24px"></i>
+        </a>
       </li>
-      <li>02:37</li>
+      <li>{{ formatDuration(track.duration_ms) }}</li>
       <li class="dropstart d-inline-flex">
         <a
           class="dropdown-link"
@@ -77,6 +79,24 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+defineProps({
+  track: {
+    type: Object,
+    required: true,
+  },
+});
+
+// Convert milliseconds → mm:ss
+const formatDuration = (ms) => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+    2,
+    "0"
+  )}`;
+};
+</script>
 
 <style></style>

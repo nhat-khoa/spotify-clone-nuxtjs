@@ -28,7 +28,7 @@
           <li class="nav-item">
             <NuxtLink
               replace
-              to="/music"
+              to="/track"
               class="nav-link d-flex align-items-center"
               exact-active-class="active"
             >

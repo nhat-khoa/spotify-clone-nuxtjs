@@ -7,27 +7,29 @@
     </NuxtLink>
     <div class="list__content">
       <NuxtLink to="/album/1" class="list__title text-truncate">
-        Mummy
+        {{ album.title }}
       </NuxtLink>
       <p class="list__subtitle text-truncate">
-        <a href="artist-details.html">Arebica Luna</a>
+        <a href="artist-details.html">
+          {{ album.artist }}
+        </a>
       </p>
     </div>
     <ul class="list__option">
-      <li>
-        <span class="badge rounded-pill bg-info"
-          ><i class="ri-vip-crown-fill"></i
-        ></span>
-      </li>
+      <!-- <li>
+        <span class="badge rounded-pill bg-info">
+          <i class="ri-vip-crown-fill"></i>
+        </span>
+      </li> -->
       <li>
         <a
           role="button"
           class="d-inline-flex"
           aria-label="Favorite"
           data-favorite-id="100"
-          ><i class="ri-heart-line heart-empty"></i>
-          <i class="ri-heart-fill heart-fill"></i
-        ></a>
+        >
+          <i class="ri-heart-fill" style="color: red; font-size: 24px"></i>
+        </a>
       </li>
       <li class="dropstart d-inline-flex">
         <a
@@ -36,8 +38,9 @@
           data-bs-toggle="dropdown"
           aria-label="Cover options"
           aria-expanded="false"
-          ><i class="ri-more-fill"></i
-        ></a>
+        >
+          <i class="ri-more-fill"></i>
+        </a>
         <ul class="dropdown-menu dropdown-menu-sm">
           <li>
             <a class="dropdown-item" role="button" data-favorite-id="100"
@@ -62,6 +65,13 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+defineProps({
+  album: {
+    type: Object,
+    required: true,
+  },
+});
+</script>
 
 <style></style>
