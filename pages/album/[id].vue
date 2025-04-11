@@ -3,7 +3,8 @@
     class="hero"
     style="background-image: url(/images/banner/song.jpg)"
   ></div>
-  <div class="under-hero container">
+  <div v-if="loading">Đang tải...</div>
+  <div v-else class="under-hero container">
     <div class="section">
       <div class="row align-items-center">
         <div class="col-xl-3 col-md-4">
@@ -248,6 +249,26 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+const trackId = route.params.id;
+
+const track = ref(null);
+const loading = ref(true);
+
+onMounted(async () => {
+  // try {
+  //   const res = await $axios.get(`/api/tracks/${trackId}/`);
+  //   track.value = res.data;
+  // } catch (err) {
+  //   console.error("Lỗi khi fetch track", err);
+  // } finally {
+  //   loading.value = false;
+  // }
+});
+</script>
 
 <style></style>
