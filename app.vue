@@ -3,4 +3,6 @@
     <NuxtPage />
   </NuxtLayout>
 </template>
-<script setup></script>
+<script setup>
+import 'remixicon/fonts/remixicon.css'
+</script>

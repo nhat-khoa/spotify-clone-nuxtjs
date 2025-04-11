@@ -10,11 +10,17 @@ export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
   ssr: false,
+  plugins: [
+    '~/plugins/bootstrap.js'
+  ],
 
   css: [
     "~/assets/css/plugins.bundle.css",
     "~/assets/css/styles.bundle.css",
     "vue-toastification/dist/index.css",
+    "bootstrap/dist/css/bootstrap.css",
+    "bootstrap-icons/font/bootstrap-icons.css",
+    'bootstrap-vue-3/dist/bootstrap-vue-3.css'
   ],
 
   modules: ["@pinia/nuxt"],

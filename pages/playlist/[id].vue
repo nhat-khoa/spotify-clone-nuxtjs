@@ -51,7 +51,7 @@
       </div>
 
       <!-- Draggable Songs List -->
-      <draggable v-model="playlist.items" item-key="uid" handle=".drag-handle" @start="drag = true" @end="handleDragEnd"
+      <draggable v-if="playlist.items?.length" v-model="playlist.items" item-key="uid" handle=".drag-handle" @start="drag = true" @end="handleDragEnd"
         class="songs-list">
         <template #item="{ element, index }">
           <div class="song-row" :class="{ 'is-dragging': drag }" @dblclick="playSong(element)">
@@ -104,11 +104,8 @@ const userStore = useUserStore();
 // Fetch playlist data
 const fetchPlaylist = async () => {
   try {
-    const response = await $axios.get(`/api/libraries/playlists/get_playlist?playlist_id=${route.params.id}`)
+    const response = await $axios.get(`/api/libraries/playlists/get_playlist_by_id?playlist_id=${route.params.id}`)
     playlist.value = response.data
-    if (playlist.value?.avatar_url) {
-      extractColorFromImage(playlist.value.avatar_url)
-    }
   } catch (error) {
     console.error('Error fetching playlist:', error)
   }
@@ -152,7 +149,10 @@ const formatDuration = (ms) => {
 
 const getTotalDuration = () => {
   if (!playlist.value?.items) return 0
-  return playlist.value.items.reduce((total, item) => total + (item.item_duration_ms || 0), 0)
+  if (Object.keys(playlist.value.items).length === 0) return 0
+
+
+  return playlist.value.items?.reduce((total, item) => total + (item.item_duration_ms || 0), 0)
 }
 
 const formatTotalDuration = (ms) => {
@@ -176,7 +176,7 @@ const formatTotalDuration = (ms) => {
   position: relative;
   padding: 24px;
   margin: -24px -24px 0;
-  background-color: #8b5959;
+  background-color: #c47777;
 }
 
 .gradient-background {
@@ -188,8 +188,8 @@ const formatTotalDuration = (ms) => {
   background: linear-gradient(
     180deg,
     var(--playlist-color) 0%,
-    rgba(206, 69, 69, 0.5) 50%,
-    #b65959 100%
+    rgba(202, 91, 91, 0.5) 50%,
+    #c25c5c 100%
   );
   opacity: 0.8;
   transition: background 0.3s ease;
@@ -209,6 +209,15 @@ const formatTotalDuration = (ms) => {
   height: 232px;
   box-shadow: 0 4px 60px rgba(0,0,0,.5);
   flex-shrink: 0;
+  background-color: #282828;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.playlist-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .playlist-info {
