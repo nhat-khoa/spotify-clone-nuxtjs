@@ -11,7 +11,7 @@
       </NuxtLink>
       <p class="list__subtitle text-truncate">
         <a href="artist-details.html">
-          {{ album.artist }}
+          {{ album.artist.name }}
         </a>
       </p>
     </div>

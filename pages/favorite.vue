@@ -18,13 +18,13 @@
           </div>
         </div>
       </div>
-      <div class="mt-4 text-center">
+      <!-- <div class="mt-4 text-center">
         <a href="javascript:void(0);" class="btn btn-primary">
           <div class="btn__wrap">
             <i class="ri-loader-3-fill"></i> <span>Load more</span>
           </div>
         </a>
-      </div>
+      </div> -->
     </div>
     <div class="section">
       <div class="section__head">
@@ -40,13 +40,13 @@
           </div>
         </div>
       </div>
-      <div class="mt-4 text-center">
+      <!-- <div class="mt-4 text-center">
         <a href="javascript:void(0);" class="btn btn-primary">
           <div class="btn__wrap">
             <i class="ri-loader-3-fill"></i> <span>Load more</span>
           </div>
         </a>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -64,15 +64,12 @@ const loading = ref(true);
 
 onMounted(async () => {
   try {
-    // gọi song song 2 api để tăng tốc độ load
-    // sử dụng Promise.all để thực hiện song song 2 api
-    const [trackRes, albumRes] = await Promise.all([
-      $axios.get("/api/favorites/tracks/"),
-      $axios.get("/api/favorites/albums/"),
-    ]);
-
-    tracks.value = trackRes.data.results.map((item) => item.track);
-    albums.value = albumRes.data.results.map((item) => item.album);
+    const response = await $axios.get("/api/libraries/get_library/");
+    console.log("response: ", response);
+    const savedTrack = response.data.saved_tracks;
+    const savedAlbum = response.data.saved_albums;
+    tracks.value = savedTrack.map((item) => item.track);
+    albums.value = savedAlbum.map((item) => item.album);
   } catch (error) {
     console.error("Lỗi khi fetch dữ liệu", error);
     toast.error("Lỗi khi fetch dữ liệu");
