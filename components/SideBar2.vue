@@ -37,6 +37,8 @@
           <button class="btn btn-dark btn-sm rounded-pill px-3 py-1">Danh sách phát</button>
           <button class="btn btn-dark btn-sm rounded-pill px-3 py-1">Nghệ sĩ</button>
           <button class="btn btn-dark btn-sm rounded-pill px-3 py-1">Album</button>
+          <button class="btn btn-dark btn-sm rounded-pill px-3 py-1">Podcast</button>
+          <button class="btn btn-dark btn-sm rounded-pill px-3 py-1">Thư mục</button>          
         </div>
 
         <!-- Search & Sort -->
@@ -143,16 +145,6 @@ const mainNavItems = [
     icon: 'ri-home-5-line', 
     path: '/home', 
     label: 'Trang chủ' 
-  },
-  { 
-    icon: 'ri-search-line', 
-    path: '/search', 
-    label: 'Tìm kiếm' 
-  },
-  {
-    icon: 'ri-user-line',
-    path: '/profile',
-    label: 'Tài khoản'
   },
   {
     icon: 'ri-heart-line',

@@ -232,7 +232,7 @@ const formatTotalDuration = (ms) => {
 }
 
 .playlist-title {
-  font-size: 6rem;
+  font-size: 2rem;
   font-weight: 700;
   margin: 0.3em 0;
 }
