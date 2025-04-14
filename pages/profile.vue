@@ -32,11 +32,30 @@
             <div class="d-flex align-items-center mb-4">
               <div class="avatar avatar--xl">
                 <div class="avatar__image">
-                  <img src="/images/users/thumb.jpg" alt="user" />
+                  <img
+                    v-if="previewUrl"
+                    :src="previewUrl"
+                    alt="Avatar preview"
+                  />
+                  <img
+                    v-else-if="user.avatar_url"
+                    :src="`http://localhost:8000${user.avatar_url}`"
+                    alt="Avatar"
+                  />
+                  <img
+                    v-else-if="user.avatar_google_url"
+                    :src="user.avatar_google_url"
+                    alt="Avatar from Google"
+                  />
                 </div>
               </div>
               <div class="ps-3">
-                <input type="file" id="profile" class="d-none" />
+                <input
+                  type="file"
+                  id="profile"
+                  class="d-none"
+                  @change="handleFileChange"
+                />
                 <label for="profile" class="btn btn-white rounded-pill"
                   >Change image</label
                 >
@@ -45,62 +64,105 @@
             <div class="row g-4">
               <div class="col-sm-6">
                 <label for="f_name" class="form-label fw-medium"
-                  >First name</label
-                >
-                <input
-                  type="text"
-                  id="f_name"
-                  class="form-control"
-                  value="Androws"
-                />
-              </div>
-              <div class="col-sm-6">
-                <label for="l_name" class="form-label fw-medium"
-                  >Last name</label
-                >
-                <input
-                  type="text"
-                  id="l_name"
-                  class="form-control"
-                  value="Kinny"
-                />
-              </div>
-              <div class="col-sm-6">
-                <label for="d_name" class="form-label fw-medium"
-                  >Display name</label
+                  >Full name</label
                 >
                 <input
                   type="text"
                   id="d_name"
                   class="form-control"
-                  value="Androws Kinny"
+                  v-model="user.full_name"
                 />
               </div>
               <div class="col-sm-6">
-                <label for="location" class="form-label fw-medium"
-                  >Location</label
+                <label for="country" class="form-label fw-medium"
+                  >Country</label
                 >
                 <input
                   type="text"
-                  id="location"
+                  id="country"
                   class="form-control"
-                  value="Australia"
+                  v-model="user.country"
                 />
               </div>
+              <div class="col-sm-6">
+                <label for="email" class="form-label fw-medium">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  class="form-control"
+                  v-model="user.email"
+                  readonly
+                />
+              </div>
+              <div class="col-sm-6">
+                <label for="gender" class="form-label fw-medium">Gender</label>
+                <select id="gender" class="form-control" v-model="user.gender">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="col-sm-6">
+                <label for="phone" class="form-label fw-medium">Phone</label>
+                <input
+                  type="text"
+                  id="phone"
+                  class="form-control"
+                  v-model="user.phone"
+                />
+              </div>
+              <div class="col-sm-6">
+                <label for="age" class="form-label fw-medium">Age</label>
+                <input
+                  type="number"
+                  id="age"
+                  class="form-control"
+                  v-model="user.age"
+                />
+              </div>
+              <div class="col-sm-6">
+                <label for="dob" class="form-label fw-medium"
+                  >Date of Birth</label
+                >
+                <input
+                  type="date"
+                  id="dob"
+                  class="form-control"
+                  v-model="user.date_of_birth"
+                />
+              </div>
+              <div class="col-sm-6">
+                <label for="subscription_type" class="form-label fw-medium"
+                  >Subscription Type</label
+                >
+                <select
+                  id="subscription_type"
+                  class="form-control"
+                  v-model="user.subscription_type"
+                >
+                  <option value="Free">Free</option>
+                  <option value="Premium">Premium</option>
+                </select>
+              </div>
               <div class="col-12">
-                <label for="about" class="form-label fw-medium">About</label>
+                <label for="description" class="form-label fw-medium"
+                  >Description</label
+                >
                 <textarea
-                  name="about"
-                  id="about"
+                  name="description"
+                  id="description"
                   cols="30"
                   rows="5"
                   class="form-control"
-                >
-Lorem ipsum, dolor sit amet consectetur adipisicing elit. Vero aspernatur veniam eum distinctio repudiandae. Nihil cum quas dolores. Beatae odio temporibus quisquam quae! Possimus repellat sapiente incidunt.</textarea
-                >
+                  v-model="user.description"
+                ></textarea>
               </div>
               <div class="col-12">
-                <button type="button" class="btn btn-primary">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  @click="handleSubmit"
+                >
                   Save changes
                 </button>
               </div>
@@ -112,6 +174,64 @@ Lorem ipsum, dolor sit amet consectetur adipisicing elit. Vero aspernatur veniam
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref } from "vue";
+import { useUserStore } from "~/stores/user";
+import { useToast } from "vue-toastification";
+
+const userStore = useUserStore();
+const user = userStore.user;
+const avatar = ref(null);
+const previewUrl = ref(null);
+const toast = useToast();
+const { $axios } = useNuxtApp();
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    avatar.value = file;
+    previewUrl.value = URL.createObjectURL(file); // hiển thị ảnh preview ngay
+  }
+};
+
+const handleSubmit = async () => {
+  const formData = new FormData();
+
+  if (avatar.value) {
+    formData.append("avatar_url", avatar.value);
+  }
+
+  formData.append("full_name", user.full_name || "");
+  formData.append("description", user.description || "");
+  formData.append("country", user.country || "");
+  formData.append("gender", user.gender || "");
+  formData.append("phone", user.phone || "");
+  formData.append("age", user.age || "");
+  formData.append("date_of_birth", user.date_of_birth || "");
+  formData.append("subscription_type", user.subscription_type || "");
+
+  try {
+    const res = await $axios.put("/api/profile/", formData, {
+      headers: {
+        Authorization: `Bearer ${user.access_token}`,
+        "Content-Type": "multipart/form-data", // giúp Django hiểu đây là upload file
+      },
+    });
+
+    userStore.setUser({
+      ...user,
+      ...res.data,
+    });
+
+    toast.success("Cập nhật thành công!");
+  } catch (err) {
+    console.error("Lỗi cập nhật:", err);
+    toast.error("Cập nhật thất bại!");
+    if (err.response?.data) {
+      console.log("Chi tiết lỗi:", err.response.data);
+    }
+  }
+};
+</script>
 
 <style></style>
