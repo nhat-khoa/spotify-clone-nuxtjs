@@ -54,6 +54,8 @@ import Header2 from '~/components/Header2.vue';
   padding: 20px;
   color: #fff;
   width: 100%;
+  padding-bottom: 90px;
+  overflow: hidden;
 }
 
 .player-bar {
