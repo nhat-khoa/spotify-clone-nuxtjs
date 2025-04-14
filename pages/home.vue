@@ -73,31 +73,18 @@
       <div class="list list--lg list--order">
         <div class="row">
           <div class="col-xl-6">
-            <Album />
-          </div>
-          <div class="col-xl-6">
-            <Album />
-          </div>
-          <div class="col-xl-6">
-            <Album />
-          </div>
-          <div class="col-xl-6">
-            <Album />
-          </div>
-          <div class="col-xl-6">
-            <Album />
-          </div>
-          <div class="col-xl-6">
-            <Album />
-          </div>
-          <div class="col-xl-6">
-            <Album />
+            <!-- <Album /> -->
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-<script setup></script>
+<script setup>
+definePageMeta({
+  layout: 'default2'
+})
+
+</script>
 
 <style></style>

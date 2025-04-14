@@ -8,16 +8,21 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: "2024-11-01",
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   ssr: false,
+  plugins: [
+  ],
 
   css: [
     "~/assets/css/plugins.bundle.css",
     "~/assets/css/styles.bundle.css",
     "vue-toastification/dist/index.css",
+    // "bootstrap/dist/css/bootstrap.css",
+    // "bootstrap-icons/font/bootstrap-icons.css",
+    // 'bootstrap-vue-3/dist/bootstrap-vue-3.css'
   ],
 
-  modules: ["@pinia/nuxt"],
+  modules: ["@pinia/nuxt",],
 
   app: {
     baseURL: "/",
@@ -26,6 +31,10 @@ export default defineNuxtConfig({
         {
           rel: "stylesheet",
           href: "https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css",
+        },
+        {
+          rel: "stylesheet",
+          href: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css",
         },
       ],
       script: [
@@ -42,7 +51,12 @@ export default defineNuxtConfig({
           async: true,
           defer: true,
         },
+        // {
+        //   src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js'
+        // },
       ],
     },
   },
 });
+
+// npm uninstall bootstrap-vue-3

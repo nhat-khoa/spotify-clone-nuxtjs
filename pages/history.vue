@@ -50,6 +50,11 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+definePageMeta({
+  layout: 'default2'
+})
+
+</script>
 
 <style></style>

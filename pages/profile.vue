@@ -179,6 +179,10 @@ import { ref } from "vue";
 import { useUserStore } from "~/stores/user";
 import { useToast } from "vue-toastification";
 
+definePageMeta({
+  layout: 'default2'
+})
+
 const userStore = useUserStore();
 const user = userStore.user;
 const avatar = ref(null);
