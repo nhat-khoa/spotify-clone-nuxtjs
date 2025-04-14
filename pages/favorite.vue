@@ -53,9 +53,8 @@
 
 <script setup>
 definePageMeta({
-  layout: 'default2'
-})
-
+  layout: "default2",
+});
 
 import { onMounted, ref } from "vue";
 import { useToast } from "vue-toastification";
@@ -73,8 +72,8 @@ onMounted(async () => {
     console.log("response: ", response);
     const savedTrack = response.data.saved_tracks;
     const savedAlbum = response.data.saved_albums;
-    tracks.value = savedTrack.map((item) => item.track);
-    albums.value = savedAlbum.map((item) => item.album);
+    tracks.value = savedTrack.map((item) => item);
+    albums.value = savedAlbum.map((item) => item);
   } catch (error) {
     console.error("Lỗi khi fetch dữ liệu", error);
     toast.error("Lỗi khi fetch dữ liệu");

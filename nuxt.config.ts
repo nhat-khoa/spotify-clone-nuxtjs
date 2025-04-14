@@ -11,7 +11,6 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   ssr: false,
   plugins: [
-    // '~/plugins/bootstrap.js',
   ],
 
   css: [
