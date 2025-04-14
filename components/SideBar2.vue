@@ -1,6 +1,6 @@
 <!-- components/SideBar2.vue -->
 <template>
-  <div class="sidebar d-flex flex-column p-0">
+  <div class="sidebar d-flex flex-column p-0 ">
     <!-- Main Navigation -->
     <nav class="main-nav">
       <ul class="nav flex-column p-2">
@@ -92,36 +92,16 @@
         <!-- Folder -->
         <SideBarLibraryItem :title="folder.name" :subtitle="`${getFolderItemCount(folder)} mục`"
           :image="'/images/folder-icon6.png'" :type="'folder'" @clickFolder="navigateToFolder(folder)"
-          :folders="folders" @contextmenu.prevent="showContextMenu($event)" />
-
-        <!-- Folder's Playlists -->
-        <!-- <SideBarLibraryItem
-            v-for="playlist in folder.playlists"
-            :key="playlist.id"
-            :title="playlist.name"
-            :subtitle="`Danh sách phát • ${playlist.user.full_name}`"
-            :image="playlist.avatar_url || '/images/default-playlist.png'"
-            :type="'playlist'"
-            :path="`/playlist/${playlist.id}`"
-          /> -->
-
-        <!-- Subfolders (recursive) -->
-        <!-- <template v-for="subfolder in folder.subfolders" :key="subfolder.id">
-            <SideBarLibraryItem
-              :title="subfolder.name"
-              :subtitle="`${getFolderItemCount(subfolder)} mục`"
-              :image="'/images/folder-icon6.png'"
-              :type="'folder'"
-              :path="`/folder/${subfolder.id}`"
-            />
-          </template> -->
+          :folders="folderMenuItems" :id="folder.id" 
+          @refresh="refreshAll" />
       </template>
 
       <!-- Root Playlists -->
       <SideBarLibraryItem v-for="playlist in playlists" :key="playlist.id" :title="playlist.name"
         :subtitle="`Danh sách phát • ${playlist.user.full_name}`"
         :image="playlist.avatar_url || '/images/default-playlist.png'" :type="'playlist'"
-        :path="`/playlist/${playlist.id}`" :folders="folders" @contextmenu.prevent="showContextMenu($event)" />
+        :path="`/playlist/${playlist.id}`" :folders="folderMenuItems" :id="playlist.id"
+        @refresh="refreshAll" />
 
       <!-- Root albums -->
       <SideBarLibraryItem v-for="album in savedAlbums" :key="album.id" :title="album.title"
@@ -140,51 +120,18 @@
         <SideBarLibraryItem v-for="playlist in currentFolder.playlists" :key="playlist.id" :title="playlist.name"
           :subtitle="`Danh sách phát • ${playlist.user.full_name}`"
           :image="playlist.avatar_url || '/images/default-playlist.png'" :type="'playlist'"
-          :path="`/playlist/${playlist.id}`" />
+          :path="`/playlist/${playlist.id}`" :folders="folderMenuItems" :id="playlist.id"
+          @refresh="refreshAll" />
         <!-- Current Folder subfolders -->
         <SideBarLibraryItem v-for="subfolder in currentFolder.subfolders" :key="subfolder.id" :title="subfolder.name"
           :subtitle="`${getFolderItemCount(subfolder)} mục`" :image="'/images/folder-icon6.png'" :type="'folder'"
-          @clickFolder="navigateToFolder(subfolder)" />
+          @clickFolder="navigateToFolder(subfolder)" :folders="folderMenuItems" :id="subfolder.id"
+          @refresh="refreshAll" />
       </template>
 
     </div>
 
-    <teleport to="body">
-      <div
-        v-if="menuVisible"
-        class="dropdown-menu show animate__animated animate__fadeIn "
-        :style="{ position: 'absolute', top: menuY + 'px', left: menuX + 'px', zIndex: 9999 }"
-      >
-        <!-- Các option -->
-        <button class="dropdown-item" @click="editItem">
-          <i class="ri-edit-line fs-5 me-2"></i>
-          Chỉnh sửa
-        </button>
-        <button class="dropdown-item" @click="deleteItem">
-          <i class="ri-delete-bin-line fs-5 me-2"></i>
-          Xóa
-        </button>
-        <button class="dropdown-item" @click="removeFromFolders">
-          <i class="bi bi-folder-x fs-5 me-2"></i>
-          Xóa khỏi các thư mục
-        </button>
-
-        <!-- Di chuyển sang thư mục -->
-        <div class="dropdown-submenu position-relative">
-          <button class="dropdown-item">
-            <i class="ri-folder-line fs-5 me-2"></i>
-            Di chuyển sang thư mục ➔
-          </button>
-          <div class="dropdown-menu show position-absolute" style="top: 0; left: 100%; min-width: 200px;">
-            <FolderList :folders="folders" @moveToFolder="moveToFolder" />
-          </div>
-        </div>
-      </div>
-    </teleport>
   </div>
-
-
-
 
 </template>
 
@@ -195,6 +142,7 @@ const { $axios } = useNuxtApp();
 const menuVisible = ref(false);
 const menuX = ref(0);
 const menuY = ref(0);
+
 
 const showContextMenu = (event) => {
   console.log(event)
@@ -242,6 +190,7 @@ const savedEpisodes = ref([])
 const savedAlbums = ref([])
 const savedPodcasts = ref([])
 const currentFolder = ref(null)
+const folderMenuItems = ref([])
 
 // Helper function to count items in a folder
 const getFolderItemCount = (folder) => {
@@ -256,6 +205,7 @@ const fetchLibrary = async () => {
     const response = await $axios.get('/api/libraries/get_library/');
     if (response.status === 200) {
       currentFolder.value = null
+      folderMenuItems.value = response.data.folders || [];
       folders.value = response.data.folders || [];
       followedArtists.value = response.data.followed_artists || [];
       playlists.value = response.data.playlists || [];
@@ -296,10 +246,23 @@ const navigateToFolder = async (folder) => {
 
 const back = async (folder) => {
   if (!folder.parent) {
-    fetchLibrary()
+    await fetchLibrary()
   }
   else {
-    navigateToFolder({ id: folder.parent })
+    await navigateToFolder({ id: folder.parent })
+  }
+}
+
+const refreshAll = async () => {
+  if (currentFolder.value) {
+    const response = await $axios.get(`/api/libraries/folders/get_folders/`);
+    if (response.status === 200) {
+      folderMenuItems.value = response.data
+    }
+    await navigateToFolder({ id: currentFolder.value.id })
+  }
+  else {
+    await fetchLibrary()
   }
 }
 
@@ -334,13 +297,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.dropdown-submenu > .dropdown-menu {
-  display: none;
-}
 
-.dropdown-submenu:hover > .dropdown-menu {
-  display: block;
-}
 
 
 
@@ -386,6 +343,7 @@ onMounted(() => {
   top: 0;
   background-color: #121212;
   border-radius: 8px 8px 0 0;
+  z-index: 5000;
 }
 
 .library-filters {

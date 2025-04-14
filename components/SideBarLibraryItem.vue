@@ -1,7 +1,7 @@
 <!-- components/SideBarLibraryItem.vue -->
 <template>
-  <div class="library-item d-flex align-items-center p-2 rounded-2" :class="{ 'ms-3': isInFolder }"
-    @click="navigateToItem">
+  <div class="library-item d-flex align-items-center p-2 rounded-2 position-relative" :class="{ 'ms-3': isInFolder }"
+    @click="navigateToItem" @contextmenu.prevent="showContextMenu($event)">
     <div class="library-item-image me-3">
       <img :src="image" :alt="title" class="rounded" :class="{
         'rounded-circle': type === 'artist',
@@ -21,7 +21,37 @@
         <span class="library-item-subtitle text-white-50 small text-truncate">{{ subtitle }}</span>
       </div>
     </div>
+
+
+    <div v-if="menuVisible" class="dropdown-menu show position-fixed"
+      :style="{ top: `${menuY}px`, left: `${menuX}px` }">
+      <!-- Các option -->
+      <button class="dropdown-item" @click="editItem(id)">
+        <i class="ri-edit-line fs-5 me-2"></i>
+        Chỉnh sửa
+      </button>
+      <button class="dropdown-item" @click="deleteItem(id)">
+        <i class="ri-delete-bin-line fs-5 me-2"></i>
+        Xóa
+      </button>
+      <button class="dropdown-item" @click="removeFromFolders(id)">
+        <i class="bi bi-folder-x fs-5 me-2"></i>
+        Xóa khỏi các thư mục
+      </button>
+
+      <!-- Di chuyển sang thư mục -->
+      <div class="dropdown-submenu position-relative">
+        <button class="dropdown-item">
+          <i class="ri-folder-line fs-5 me-2"></i>
+          Di chuyển sang thư mục ➔
+        </button>
+        <div class="dropdown-menu show position-absolute" style="top: 0; left: 100%; min-width: 200px;">
+          <FolderList :folders="folders" @moveToFolder="moveToFolder" />
+        </div>
+      </div>
+    </div>
   </div>
+
 
 
 
@@ -31,12 +61,94 @@
 import { useRouter } from "vue-router";
 import { computed, ref } from "vue";
 import FolderList from './FolderList.vue'
+const { $axios } = useNuxtApp();
+
+const emit = defineEmits(['clickFolder','refresh'])
+
+const menuVisible = ref(false);
+const menuX = ref(0);
+const menuY = ref(0);
+
+const showContextMenu = (event) => {
+  if (props.type === 'folder' || props.type === 'playlist') {
+    menuVisible.value = true
+    menuX.value = event.clientX
+    menuY.value = event.clientY
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', () => {
+    menuVisible.value = false
+  })
+
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', () => {
+    menuVisible.value = false
+  })
+})
+
+const editItem = async (id) => {
+  if (props.type === 'folder') {
+    const name = prompt('Nhập tên thư mục', props.title)
+    if (name) {
+      await $axios.put(`/api/libraries/folders/update_folder/`, {
+        folder_id: id,
+        name: name
+      })
+      emit('refresh')
+    }
+  }
+}
+
+const deleteItem = async (id) => {
+  if (props.type === 'folder' || props.type === 'playlist') {
+    await $axios.delete(`/api/libraries/${props.type === 'folder' ? 'folders' : 'playlists'}/remove_${props.type}/`, {
+        [`${props.type}_id`]: id
+    })
+    emit('refresh')
+  }
+}
+
+const removeFromFolders = async (id) => {
+  if (props.type === 'folder' || props.type === 'playlist') {
+    await $axios.put(`/api/libraries/${props.type === 'folder' ? 'folders' : 'playlists'}/remove_${props.type}_from_folder/`, {
+        [`${props.type}_id`]: id
+    })
+    emit('refresh')
+  }
+}
+
+const moveToFolder = async (folderId) => {
+  if (props.type === 'folder' || props.type === 'playlist') {
+    await $axios.put(`/api/libraries/${props.type === 'folder' ? 'folders' : 'playlists'}/add_${props.type}_to_folder/`, {
+        [`${props.type}_id`]: props.id,
+        parent_folder_id: folderId
+    }).catch(error => {
+      console.log(error)
+      console.error('Error moving item to folder: ' + error)
+      alert('Error moving item to folder: ' + error.response.data.error)
+      return
+    })
+    emit('refresh')
+  }
+
+  // console.log({
+  //       [`${props.type}_id`]: props.id,
+  //       parent_folder_id: folderId
+  //   })
+}
 
 
 
-const emit = defineEmits(['clickFolder'])
 
 const props = defineProps({
+  id: {
+    type: String,
+    required: false,
+  },
   folders: {
     type: Array,
     required: false
@@ -62,7 +174,7 @@ const props = defineProps({
     type: String,
     default: "playlist",
     validator: (value) =>
-      ["playlist", "artist", "album", "folder", "podcast", 'track','episode'].includes(value),
+      ["playlist", "artist", "album", "folder", "podcast", 'track', 'episode'].includes(value),
   },
   isInFolder: {
     type: Boolean,
@@ -83,6 +195,13 @@ const navigateToItem = () => {
 </script>
 
 <style scoped>
+.dropdown-submenu>.dropdown-menu {
+  display: none;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
 
 
 .library-item {
@@ -117,6 +236,4 @@ const navigateToItem = () => {
 .library-item-meta {
   line-height: 1.2;
 }
-
-
 </style>
