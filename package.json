@@ -12,9 +12,6 @@
   "dependencies": {
     "@pinia/nuxt": "^0.10.1",
     "axios": "^1.8.4",
-    "bootstrap": "^5.3.5",
-    "bootstrap-icons": "^1.11.3",
-    "bootstrap-vue-3": "^0.5.1",
     "floating-vue": "^5.2.2",
     "js-cookie": "^3.0.5",
     "nuxt": "^3.16.0",

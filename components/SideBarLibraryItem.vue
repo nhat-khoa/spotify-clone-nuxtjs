@@ -13,11 +13,11 @@
     <div class="library-item-info flex-grow-1">
       <div class="library-item-title text-truncate">{{ title }}</div>
       <div class="library-item-meta d-flex align-items-center gap-2">
-        <i v-if="type === 'artist'" class="ri-verified-badge-fill text-primary small"></i>
-        <i v-if="type === 'folder'" class="ri-folder-fill text-primary small"></i>
-        <i v-if="type === 'podcast'" class="ri-mic-fill text-primary small"></i>
-        <i v-if="type === 'album'" class="ri-album-fill text-primary small"></i>
-        <i v-if="type === 'playlist'" class="ri-play-list-fill text-primary small"></i>
+        <i v-if="type === 'artist'" class="ri-verified-badge-fill text-primary fs-6"></i>
+        <i v-if="type === 'folder'" class="ri-folder-fill text-primary fs-6"></i>
+        <i v-if="type === 'podcast'" class="ri-mic-fill text-primary fs-6"></i>
+        <i v-if="type === 'album'" class="ri-album-fill text-primary fs-6"></i>
+        <i v-if="type === 'playlist'" class="ri-play-list-fill text-primary fs-6"></i>
         <span class="library-item-subtitle text-white-50 small text-truncate">{{ subtitle }}</span>
       </div>
     </div>
