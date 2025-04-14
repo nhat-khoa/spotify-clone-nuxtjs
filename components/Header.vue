@@ -377,7 +377,16 @@
                 aria-expanded="false"
               >
                 <div v-if="userStore.isLoaded" class="avatar__image">
-                  <img :src="userStore.user.avatar_google_url" alt="user" />
+                  <img
+                    v-if="userStore.user.avatar_url"
+                    :src="`http://localhost:8000${userStore.user.avatar_url}`"
+                    alt="Avatar"
+                  />
+                  <img
+                    v-else-if="userStore.user.avatar_google_url"
+                    :src="userStore.user.avatar_google_url"
+                    alt="Avatar from Google"
+                  />
                 </div>
                 <span v-if="userStore.isLoaded" class="ps-2 d-none d-sm-block">
                   {{ userStore.user.full_name }}
@@ -390,7 +399,16 @@
                 <li>
                   <div class="py-2 px-3 avatar avatar--lg">
                     <div v-if="userStore.isLoaded" class="avatar__image">
-                      <img :src="userStore.user.avatar_google_url" alt="user" />
+                      <img
+                        v-if="userStore.user.avatar_url"
+                        :src="`http://localhost:8000${userStore.user.avatar_url}`"
+                        alt="Avatar"
+                      />
+                      <img
+                        v-else-if="userStore.user.avatar_google_url"
+                        :src="userStore.user.avatar_google_url"
+                        alt="Avatar from Google"
+                      />
                     </div>
                     <div class="avatar__content">
                       <span v-if="userStore.isLoaded" class="avatar__title">
