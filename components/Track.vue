@@ -2,17 +2,15 @@
   <div class="list__item">
     <div class="list__cover">
       <div class="ratio ratio-1x1">
-        <img src="/images/cover/small/8.jpg" alt="Hey not me" />
+        <img src="/images/default-track-avatar.png" alt="track-avatar" />
       </div>
-      <a
-        href="javascript:void(0);"
+      <button
+        @click="handleClickPlay"
         class="btn btn-play btn-sm btn-default btn-icon rounded-pill"
-        data-play-id="8"
-        aria-label="Play pause"
       >
         <i class="ri-play-fill icon-play"></i>
-        <i class="ri-pause-fill icon-pause"></i>
-      </a>
+        <!-- <i class="ri-pause-fill icon-pause"></i> -->
+      </button>
     </div>
     <div class="list__content">
       <NuxtLink :to="`/track/${track.id}`" class="list__title text-truncate">
@@ -71,7 +69,14 @@
           </li>
           <li class="dropdown-divider"></li>
           <li>
-            <a class="dropdown-item" role="button" data-play-id="8">Play</a>
+            <button
+              @click="handleClickPlay"
+              class="dropdown-item"
+              role="button"
+              data-play-id="8"
+            >
+              Play
+            </button>
           </li>
         </ul>
       </li>
@@ -80,12 +85,13 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   track: {
     type: Object,
     required: true,
   },
 });
+const player = usePlayerStore();
 
 // Convert milliseconds → mm:ss
 const formatDuration = (ms) => {
@@ -97,6 +103,11 @@ const formatDuration = (ms) => {
     "0"
   )}`;
 };
+
+function handleClickPlay() {
+  console.log("Play track id: ", props.track.id);
+  player.setPlaylist([props.track.id]);
+}
 </script>
 
 <style></style>
