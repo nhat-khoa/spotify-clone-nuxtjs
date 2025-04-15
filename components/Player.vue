@@ -24,7 +24,7 @@
             <div class="ratio ratio-1x1">
               <img
                 :src="
-                  player.currentSong?.cover_art_url ||
+                  player.currentSong?.avatar_url ||
                   '/images/default-track-avatar.png'
                 "
                 alt="track-avatar"
