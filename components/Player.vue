@@ -111,6 +111,7 @@
                 step="0.01"
                 :value="player.audio?.volume || 0"
                 @input="player.setVolume($event.target.value)"
+                class="volume-slider-vertical"
               />
             </div>
           </div>
@@ -266,4 +267,11 @@ onMounted(loadNextTracks);
 watch([() => player.currentIndex, () => player.playlist], loadNextTracks);
 </script>
 
-<style scoped></style>
+<style scoped>
+.volume-slider-vertical {
+  writing-mode: bt-lr; /* bottom to top, left to right */
+  -webkit-appearance: slider-vertical; /* for some older browsers */
+  width: 8px;
+  height: 100px;
+}
+</style>
