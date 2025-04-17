@@ -21,39 +21,39 @@
         <span class="library-item-subtitle text-white-50 small text-truncate">{{ subtitle }}</span>
       </div>
     </div>
+  </div>
 
+  <!-- Context Menu -->
+  <div v-if="menuVisible" class="dropdown-menu show position-fixed" :style="{ top: `${menuY}px`, left: `${menuX}px` }">
+    <!-- Các option -->
+    <button class="dropdown-item" @click.stop="editItem">
+      <i class="ri-edit-line fs-5 me-2"></i>
+      Chỉnh sửa
+    </button>
+    <button class="dropdown-item" @click.stop="deleteItem">
+      <i class="ri-delete-bin-line fs-5 me-2"></i>
+      Xóa
+    </button>
+    <button class="dropdown-item" @click.stop="removeFromFolders">
+      <i class="bi bi-folder-x fs-5 me-2"></i>
+      Xóa khỏi các thư mục
+    </button>
 
-    <div v-if="menuVisible" class="dropdown-menu show position-fixed"
-      :style="{ top: `${menuY}px`, left: `${menuX}px` }">
-      <!-- Các option -->
-      <button class="dropdown-item" @click="editItem(id)">
-        <i class="ri-edit-line fs-5 me-2"></i>
-        Chỉnh sửa
+    <!-- Di chuyển sang thư mục -->
+    <div class="dropdown-submenu position-relative">
+      <button class="dropdown-item">
+        <i class="ri-folder-line fs-5 me-2"></i>
+        Di chuyển sang thư mục ➔
       </button>
-      <button class="dropdown-item" @click="deleteItem(id)">
-        <i class="ri-delete-bin-line fs-5 me-2"></i>
-        Xóa
-      </button>
-      <button class="dropdown-item" @click="removeFromFolders(id)">
-        <i class="bi bi-folder-x fs-5 me-2"></i>
-        Xóa khỏi các thư mục
-      </button>
-
-      <!-- Di chuyển sang thư mục -->
-      <div class="dropdown-submenu position-relative">
-        <button class="dropdown-item">
-          <i class="ri-folder-line fs-5 me-2"></i>
-          Di chuyển sang thư mục ➔
-        </button>
-        <div class="dropdown-menu show position-absolute" style="top: 0; left: 100%; min-width: 200px;">
-          <FolderList :folders="folders" @moveToFolder="moveToFolder" />
-        </div>
+      <div class="dropdown-menu show position-absolute" style="top: 0; left: 100%; min-width: 200px;">
+        <FolderList :folders="folders" @moveToFolder="moveToFolder" />
       </div>
     </div>
   </div>
 
-
-
+  <dialog ref="myDialog">
+    
+  </dialog>
 
 </template>
 
@@ -63,8 +63,9 @@ import { computed, ref } from "vue";
 import FolderList from './FolderList.vue'
 const { $axios } = useNuxtApp();
 
-const emit = defineEmits(['clickFolder','refresh'])
 
+const emit = defineEmits(['clickFolder', 'refresh'])
+const myDialog = ref(null)
 const menuVisible = ref(false);
 const menuX = ref(0);
 const menuY = ref(0);
@@ -90,32 +91,41 @@ onBeforeUnmount(() => {
   })
 })
 
-const editItem = async (id) => {
+const editItem = async () => {
   if (props.type === 'folder') {
     const name = prompt('Nhập tên thư mục', props.title)
     if (name) {
       await $axios.put(`/api/libraries/folders/update_folder/`, {
-        folder_id: id,
+        folder_id: props.id,
         name: name
       })
       emit('refresh')
     }
   }
+  if (props.type === 'playlist') {
+    myDialog.value.showModal()
+  }
 }
 
-const deleteItem = async (id) => {
+const deleteItem = async () => {
   if (props.type === 'folder' || props.type === 'playlist') {
     await $axios.delete(`/api/libraries/${props.type === 'folder' ? 'folders' : 'playlists'}/remove_${props.type}/`, {
-        [`${props.type}_id`]: id
+      data: { [`${props.type}_id`]: props.id }
+    }).catch(error => {
+      alert('Error deleting item: ' + error?.response?.data?.error)
+      return
     })
     emit('refresh')
   }
 }
 
-const removeFromFolders = async (id) => {
+const removeFromFolders = async () => {
   if (props.type === 'folder' || props.type === 'playlist') {
     await $axios.put(`/api/libraries/${props.type === 'folder' ? 'folders' : 'playlists'}/remove_${props.type}_from_folder/`, {
-        [`${props.type}_id`]: id
+      [`${props.type}_id`]: props.id
+    }).catch(error => {
+      alert('Error removing item from folders: ' + error?.response?.data?.error)
+      return
     })
     emit('refresh')
   }
@@ -124,24 +134,15 @@ const removeFromFolders = async (id) => {
 const moveToFolder = async (folderId) => {
   if (props.type === 'folder' || props.type === 'playlist') {
     await $axios.put(`/api/libraries/${props.type === 'folder' ? 'folders' : 'playlists'}/add_${props.type}_to_folder/`, {
-        [`${props.type}_id`]: props.id,
-        parent_folder_id: folderId
+      [`${props.type}_id`]: props.id,
+      parent_folder_id: folderId
     }).catch(error => {
-      console.log(error)
-      console.error('Error moving item to folder: ' + error)
-      alert('Error moving item to folder: ' + error.response.data.error)
+      alert('Error moving item to folder: ' + error?.response?.data?.error)
       return
     })
     emit('refresh')
   }
-
-  // console.log({
-  //       [`${props.type}_id`]: props.id,
-  //       parent_folder_id: folderId
-  //   })
 }
-
-
 
 
 const props = defineProps({
