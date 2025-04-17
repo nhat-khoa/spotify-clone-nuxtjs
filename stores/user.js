@@ -17,6 +17,7 @@ export const useUserStore = defineStore("user", () => {
     country: "",
     subscription_type: "",
     access_token: "",
+    refresh_token: "",
   });
 
   const isLoaded = ref(false);
@@ -50,6 +51,7 @@ export const useUserStore = defineStore("user", () => {
       country: "",
       subscription_type: "",
       access_token: "",
+      refresh_token: "",
     };
     localStorage.removeItem("user");
   };

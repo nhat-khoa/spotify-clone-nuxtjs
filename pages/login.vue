@@ -92,6 +92,7 @@ import { ref } from "vue";
 
 definePageMeta({
   layout: "auth",
+  guest: true,
 });
 
 const { $googleSignIn, $axios } = useNuxtApp();
@@ -130,6 +131,7 @@ async function loginWithGoogle(credential) {
       full_name: data.user.full_name,
       avatar_google_url: data.user.avatar_google_url,
       access_token: data.access_token,
+      refresh_token: data.refresh_token,
     });
 
     toast.success("Login success!");
@@ -141,6 +143,7 @@ async function loginWithGoogle(credential) {
 }
 
 async function handleLogin() {
+
   try {
     isLoading.value = true;
     const response = await $axios.post("/api/auth/login/", {
@@ -157,6 +160,7 @@ async function handleLogin() {
       avatar_google_url:
         data.user.avatar_google_url || data.user.avatar_url || "",
       access_token: data.access_token,
+      refresh_token: data.refresh_token,
     });
 
     toast.success("Login success!");
