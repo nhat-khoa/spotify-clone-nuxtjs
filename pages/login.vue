@@ -132,6 +132,7 @@ async function loginWithGoogle(credential) {
       avatar_google_url: data.user.avatar_google_url,
       access_token: data.access_token,
       refresh_token: data.refresh_token,
+      premium_expired: data.user.premium_expired,
     });
 
     toast.success("Login success!");
@@ -143,7 +144,6 @@ async function loginWithGoogle(credential) {
 }
 
 async function handleLogin() {
-
   try {
     isLoading.value = true;
     const response = await $axios.post("/api/auth/login/", {

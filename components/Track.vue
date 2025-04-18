@@ -26,11 +26,12 @@
       </p>
     </div>
     <ul class="list__option">
-      <!-- <li>
-        <span class="badge rounded-pill bg-info">
-          <i class="ri-vip-crown-fill"></i>
+      <li>
+        <!-- Premium Badge -->
+        <span v-if="track?.is_premium" class="badge rounded-pill bg-info">
+          <i class="ri-vip-crown-fill"> Premium</i>
         </span>
-      </li> -->
+      </li>
       <li>
         <a
           role="button"
@@ -88,12 +89,17 @@
 </template>
 
 <script setup>
+import { useToast } from "vue-toastification";
+
 const props = defineProps({
   track: {
     type: Object,
     required: true,
   },
 });
+const toast = useToast();
+const { $axios } = useNuxtApp();
+
 const player = usePlayerStore();
 
 // Convert milliseconds → mm:ss
@@ -107,10 +113,25 @@ const formatDuration = (ms) => {
   )}`;
 };
 
-function handleClickPlay() {
-  console.log("Play track id: ", props.track.id);
-  player.setPlaylist([props.track.id]);
-}
+const handleClickPlay = async () => {
+  console.log("Play track: ", props.track);
+  console.log("track is_premium: ", props.track.is_premium);
+  if (props.track.is_premium) {
+    try {
+      const res = await $axios.get(`/api/profile/check-premium`);
+      if (res.data.is_premium) {
+        player.setPlaylist([props.track.id]);
+      } else {
+        toast.info("Bạn cần tài khoản Premium để phát bài hát này.");
+      }
+    } catch (error) {
+      console.error("Lỗi check-premium:", error);
+      toast.error("Lỗi check-premium!" + error);
+    }
+  } else {
+    player.setPlaylist([props.track.id]);
+  }
+};
 </script>
 
 <style></style>
