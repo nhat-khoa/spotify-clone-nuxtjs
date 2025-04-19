@@ -12,6 +12,7 @@ export const usePlayerStore = defineStore("player", () => {
   const isVisible = ref(false);
 
   async function setPlaylist(trackIds = [], startIndex = 0) {
+    console.log("Setting playlist with track IDs:", trackIds);
     playlist.value = trackIds;
     currentIndex.value = startIndex;
     isVisible.value = true;
@@ -35,8 +36,6 @@ export const usePlayerStore = defineStore("player", () => {
 
     audio.value.play();
     isPlaying.value = true;
-
-    // saveStateToLocalStorage();
   }
 
   async function playPause() {
@@ -55,13 +54,13 @@ export const usePlayerStore = defineStore("player", () => {
   }
 
   async function playNext() {
+    console.log("currentIndex.value: " + currentIndex.value);
     if (currentIndex.value < playlist.value.length - 1) {
       currentIndex.value++;
-      await loadCurrentSong();
     } else {
-      audio.value.pause();
-      isPlaying.value = false;
+      currentIndex.value = 0;
     }
+    await loadCurrentSong();
   }
 
   async function playPrev() {
@@ -71,36 +70,17 @@ export const usePlayerStore = defineStore("player", () => {
     }
   }
 
+  const playTrackByIndex = async (index) => {
+    if (index < 0 || index >= playlist.value.length) return;
+    currentIndex.value = index;
+    await loadCurrentSong();
+  };
+
   function setVolume(volume) {
     if (audio.value) {
       audio.value.volume = volume;
     }
   }
-
-  // function saveStateToLocalStorage() {
-  //   localStorage.setItem("player_playlist", JSON.stringify(playlist.value));
-  //   localStorage.setItem("player_currentIndex", currentIndex.value.toString());
-  // }
-
-  // async function restoreFromLocalStorage() {
-  //   const storedPlaylist = localStorage.getItem("player_playlist");
-  //   const storedIndex = localStorage.getItem("player_currentIndex");
-
-  //   if (storedPlaylist) {
-  //     playlist.value = JSON.parse(storedPlaylist);
-  //   }
-
-  //   if (storedIndex) {
-  //     currentIndex.value = parseInt(storedIndex, 10);
-  //   }
-
-  //   if (playlist.value.length > 0) {
-  //     await loadCurrentSong();
-  //   }
-  // }
-
-  // // Tự động restore khi gọi store
-  // restoreFromLocalStorage();
 
   return {
     playlist,
@@ -111,6 +91,7 @@ export const usePlayerStore = defineStore("player", () => {
     playNext,
     playPrev,
     setPlaylist,
+    playTrackByIndex,
     setVolume,
     audio,
     isVisible,

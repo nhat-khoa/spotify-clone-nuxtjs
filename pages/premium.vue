@@ -57,7 +57,7 @@
               role="status"
               aria-hidden="true"
             ></span>
-            {{ isVerifying ? "..." : "Verify" }}
+            {{ isVerifying ? "..." : "Verify Payment" }}
           </button>
 
           <div class="card-body d-flex flex-column">

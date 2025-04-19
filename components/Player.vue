@@ -163,32 +163,51 @@
               <div
                 class="playlist__head d-flex align-items-center justify-content-between"
               >
-                <h6 class="mb-0">Next Lineup</h6>
+                <h6 class="mb-0">PlayList</h6>
               </div>
               <div id="playlist" class="list playlist__body" data-scroll="true">
                 <div
-                  v-if="nextTracks.length === 0"
+                  v-if="listTracks.length === 0"
                   class="col-sm-8 col-10 mx-auto mt-5 text-center"
                 >
                   <i class="ri-music-2-line mb-3"></i>
                   <p>No songs, album or playlist are added on lineup.</p>
                 </div>
+                <!-- Bọc ngoài đoạn v-for bằng div cuộn -->
                 <div
-                  v-else
-                  v-for="track in nextTracks"
-                  :key="track.id"
-                  class="d-flex align-items-center justify-content-between py-2 px-3 border-bottom"
+                  class="track-list-wrapper overflow-auto"
+                  style="max-height: 416px"
                 >
-                  <div class="d-flex align-items-center">
-                    <img
-                      :src="track.thumbnail_url"
-                      alt="cover"
-                      class="rounded me-2"
-                      style="width: 40px; height: 40px; object-fit: cover"
-                    />
-                    <div>
-                      <p class="mb-0 fw-bold">{{ track.title }}</p>
-                      <small class="text-muted">{{ track.artist_name }}</small>
+                  <div
+                    v-for="(track, index) in listTracks"
+                    :key="index"
+                    class="d-flex align-items-center justify-content-between py-2 px-3 border-bottom track-item"
+                    :class="{ 'bg-light': player.currentIndex === index }"
+                    @click="player.playTrackByIndex(index)"
+                    style="cursor: pointer"
+                  >
+                    <div class="d-flex align-items-center">
+                      <img
+                        :src="
+                          track?.avatar_url ||
+                          '/images/default-track-avatar.png'
+                        "
+                        alt="cover"
+                        class="rounded me-2"
+                        style="width: 40px; height: 40px; object-fit: cover"
+                      />
+                      <div>
+                        <p class="mb-0 fw-bold">
+                          {{ track.title }}
+                          <i
+                            v-if="player.currentIndex === index"
+                            class="ri-volume-up-fill text-primary ms-2"
+                          ></i>
+                        </p>
+                        <small class="text-muted">{{
+                          track.artist_name
+                        }}</small>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -209,7 +228,7 @@ const player = usePlayerStore();
 const currentTime = ref(0);
 const duration = ref(0);
 const progress = ref(0);
-const nextTracks = ref([]);
+const listTracks = ref([]);
 
 function formatTime(seconds) {
   const min = Math.floor(seconds / 60)
@@ -256,22 +275,22 @@ const fetchTrackById = async (id) => {
   }
 };
 
-async function loadNextTracks() {
-  const nextIds = player.playlist.slice(player.currentIndex + 1);
-  const results = await Promise.all(nextIds.map(fetchTrackById));
-  nextTracks.value = results.filter(Boolean); // bỏ track null nếu lỗi
+async function loadlistTracks() {
+  const listTrackId = player.playlist.slice();
+  const results = await Promise.all(listTrackId.map(fetchTrackById));
+  listTracks.value = results.filter(Boolean); // bỏ track null nếu lỗi
 }
 
 // Tự load khi mounted hoặc khi playlist/index thay đổi
-onMounted(loadNextTracks);
-watch([() => player.currentIndex, () => player.playlist], loadNextTracks);
+onMounted(loadlistTracks);
+watch([() => player.currentIndex, () => player.playlist], loadlistTracks);
 </script>
 
 <style scoped>
 .volume-slider-vertical {
   writing-mode: bt-lr; /* bottom to top, left to right */
   -webkit-appearance: slider-vertical; /* for some older browsers */
-  width: 8px;
+  width: 40px;
   height: 100px;
 }
 </style>

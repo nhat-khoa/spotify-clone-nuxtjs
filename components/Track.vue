@@ -8,7 +8,7 @@
         />
       </div>
       <button
-        @click="handleClickPlay"
+        @click="handleClickPlayTrack"
         class="btn btn-play btn-sm btn-default btn-icon rounded-pill"
       >
         <i class="ri-play-fill icon-play"></i>
@@ -73,12 +73,7 @@
           </li>
           <li class="dropdown-divider"></li>
           <li>
-            <button
-              @click="handleClickPlay"
-              class="dropdown-item"
-              role="button"
-              data-play-id="8"
-            >
+            <button @click="handleClickPlayTrack" class="dropdown-item">
               Play
             </button>
           </li>
@@ -113,7 +108,7 @@ const formatDuration = (ms) => {
   )}`;
 };
 
-const handleClickPlay = async () => {
+const handleClickPlayTrack = async () => {
   console.log("Play track: ", props.track);
   console.log("track is_premium: ", props.track.is_premium);
   if (props.track.is_premium) {
