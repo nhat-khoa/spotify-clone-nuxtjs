@@ -104,7 +104,7 @@ const handleClickPlayAlbum = async () => {
       if (res.data.is_premium) {
         player.setPlaylist(props.album.tracks.slice());
       } else {
-        toast.info("Bạn cần tài khoản Premium để phát bài hát này.");
+        toast.info("Bạn cần tài khoản Premium để phát album này.");
       }
     } catch (error) {
       console.error("Lỗi check-premium:", error);
