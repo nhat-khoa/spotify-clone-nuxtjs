@@ -35,9 +35,12 @@
           role="button"
           class="d-inline-flex"
           aria-label="Favorite"
-          data-favorite-id="100"
+          @click="toggleFavorite"
         >
-          <i class="ri-heart-fill" style="color: red; font-size: 24px"></i>
+          <i
+            :class="isFavorite ? 'ri-heart-fill' : 'ri-heart-line'"
+            :style="isFavorite ? { color: 'red', fontSize: '24px' } : {}"
+          ></i>
         </a>
       </li>
       <li class="dropstart d-inline-flex">
@@ -89,6 +92,7 @@ const props = defineProps({
 const $axios = useNuxtApp().$axios;
 const player = usePlayerStore();
 const toast = useToast();
+const isFavorite = ref(props.album?.is_favorite || false);
 
 const handleClickPlayAlbum = async () => {
   console.log("Play album: ", props.album);
@@ -108,6 +112,28 @@ const handleClickPlayAlbum = async () => {
     }
   } else {
     player.setPlaylist(props.album.tracks.slice());
+  }
+};
+
+const toggleFavorite = async () => {
+  try {
+    const endpoint = isFavorite.value
+      ? "/api/libraries/albums/remove_saved_album/"
+      : "/api/libraries/albums/save_album/";
+
+    const res = await $axios.post(endpoint, {
+      album_id: props.album.id,
+    });
+    console.log("res toggleFavorite:", res);
+    if (res.status === 200 || res.status === 201) {
+      isFavorite.value = !isFavorite.value;
+      toast.success(
+        isFavorite.value ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích"
+      );
+    }
+  } catch (error) {
+    console.error("Lỗi toggleFavorite:", error);
+    toast.error("Lỗi toggleFavorite:" + error);
   }
 };
 </script>
