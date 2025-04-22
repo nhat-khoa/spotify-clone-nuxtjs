@@ -10,12 +10,13 @@
       </main>
     </div>
     <Player class="player-bar" />
+    <AIChatButton />
   </div>
 </template>
 
 <script setup>
-import SideBar2 from '~/components/SideBar2.vue';
-import Header2 from '~/components/Header2.vue';
+import SideBar2 from "~/components/SideBar2.vue";
+import Header2 from "~/components/Header2.vue";
 // No additional script needed for this component
 </script>
 
@@ -59,7 +60,6 @@ import Header2 from '~/components/Header2.vue';
 }
 
 .player-bar {
-
 }
 
 /* Responsive adjustments for smaller screens */
