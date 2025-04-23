@@ -45,9 +45,9 @@
           class="form-control bg-white"
           :placeholder="$t('AIChatButton.askAI')"
           v-model="userInput"
-          @keyup.enter="sendMessage"
+          @keyup.enter="sendMessage2"
         />
-        <button class="btn btn-primary btn-send" @click="sendMessage">
+        <button class="btn btn-primary btn-send" @click="sendMessage2">
           <i class="ri-send-plane-fill"></i>
         </button>
       </div>
@@ -66,10 +66,10 @@ const { $axios } = useNuxtApp();
 const isLoading = ref(false);
 
 const OPENROUTER_API_KEY =
-  "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";
+  "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";
 
-const MODEL_NAME = "deepseek-chat:free";
-// const MODEL_NAME = "deepseek/deepseek-chat-v3-0324:free";
+// const MODEL_NAME = "deepseek-chat:free";
+const MODEL_NAME = "deepseek/deepseek-chat-v3-0324:free";
 // const MODEL_NAME = "mistralai/mistral-7b-instruct:free"; //nhanh ok nè mà hơi ngu
 
 // const MODEL_NAME = "google/gemini-pro:free";
@@ -93,84 +93,140 @@ function formatMessage(text) {
     .replace(/\n/g, "<br>");
 }
 
-const sendMessage = async () => {
+// const sendMessage = async () => {
+//   const question = userInput.value.trim();
+//   if (!question) return;
+
+//   messages.value.push({ from: "user", text: question });
+//   userInput.value = "";
+
+//   isLoading.value = true; // 👉 Start loading
+//   try {
+//     const dbMetadata = await $axios.get("/api/db-metadata/");
+//     console.log("dbMetadata", dbMetadata.data);
+
+//     const deepSeekRes = await fetch(
+//       "https://openrouter.ai/api/v1/chat/completions",
+//       {
+//         method: "POST",
+//         headers: {
+//           Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           model: MODEL_NAME,
+//           messages: [
+//             {
+//               role: "system",
+//               content: `Bạn là một trợ lý dữ liệu.
+//               Dưới đây là metadata của database dưới dạng JSON:\n\n
+//               ${JSON.stringify(dbMetadata, null, 2)}`,
+//             },
+//             {
+//               role: "user",
+//               content: `Dựa vào metadata trên,
+//               hãy xử lý câu hỏi sau theo quy tắc sau:
+//                 - Nếu câu hỏi yêu cầu truy vấn dữ liệu từ các bảng để có câu trả lời, trả về tên bảng theo định dạng: true table1 table2 ... (không giải thích gì thêm).
+//                 - Nếu câu hỏi không cần dữ liệu từ bảng (chỉ cần kiến thức thông thường), trả về theo định dạng: false câu trả lời
+//               Câu hỏi: "${question}"`,
+//             },
+//           ],
+//           temperature: 0.2,
+//         }),
+//       }
+//     );
+
+//     const result = await deepSeekRes.json();
+//     const answer =
+//       result.choices?.[0]?.message?.content ?? "Không có phản hồi.";
+
+//     console.log("answer: ", answer);
+
+//     if (answer.startsWith("false")) {
+//       const reply = answer.replace("false", "").trim();
+//       messages.value.push({ from: "ai", text: reply });
+//     } else if (answer.startsWith("true")) {
+//       const tables = answer.replace("true", "").trim().split(" ");
+//       console.log("Cần lấy data từ các bảng:", tables);
+//       await handleAnswerWithTables(tables, question);
+//     } else {
+//       messages.value.push({ from: "ai", text: answer });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     messages.value.push({
+//       from: "ai",
+//       text: "Đã xảy ra lỗi khi gọi AI hoặc API Django.",
+//     });
+//   } finally {
+//     isLoading.value = false; // 👉 End loading
+//   }
+// };
+
+// const handleAnswerWithTables = async (tables, question) => {
+//   try {
+//     const response = await $axios.get("/api/multi-table-data/", {
+//       params: { tables: tables.join(",") },
+//     });
+
+//     const tableData = response.data;
+
+//     const deepSeekWithData = await fetch(
+//       "https://openrouter.ai/api/v1/chat/completions",
+//       {
+//         method: "POST",
+//         headers: {
+//           Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           model: MODEL_NAME,
+//           messages: [
+//             {
+//               role: "system",
+//               content: `Bạn là một trợ lý dữ liệu. Dưới đây là dữ liệu thực tế từ các bảng:\n\n
+//               ${JSON.stringify(tableData, null, 2)}`,
+//             },
+//             {
+//               role: "user",
+//               content: `Dựa vào dữ liệu trên, hãy trả lời câu hỏi sau: "${question}"`,
+//             },
+//           ],
+//           temperature: 0.2,
+//         }),
+//       }
+//     );
+
+//     const resultWithData = await deepSeekWithData.json();
+//     const finalAnswer =
+//       resultWithData.choices?.[0]?.message?.content ?? "Không có phản hồi.";
+//     messages.value.push({ from: "ai", text: finalAnswer });
+//   } catch (error) {
+//     console.error("Lỗi khi xử lý dữ liệu:", error);
+//     messages.value.push({
+//       from: "ai",
+//       text: "Đã xảy ra lỗi khi truy vấn dữ liệu hoặc gọi lại AI.",
+//     });
+//   } finally {
+//     isLoading.value = false; // 👉 Kết thúc loading ở đây luôn
+//   }
+// };
+
+const sendMessage2 = async () => {
   const question = userInput.value.trim();
   if (!question) return;
 
   messages.value.push({ from: "user", text: question });
   userInput.value = "";
 
-  isLoading.value = true; // 👉 Start loading
-
-  try {
-    const dbMetadata = await $axios.get("/api/db-metadata/");
-    console.log("dbMetadata", dbMetadata.data);
-
-    const deepSeekRes = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: MODEL_NAME,
-          messages: [
-            {
-              role: "system",
-              content: `Bạn là một trợ lý dữ liệu. 
-              Dưới đây là metadata của database dưới dạng JSON:\n\n
-              ${JSON.stringify(dbMetadata, null, 2)}`,
-            },
-            {
-              role: "user",
-              content: `Dựa vào metadata trên, 
-              hãy xử lý câu hỏi sau theo quy tắc sau:
-                - Nếu câu hỏi yêu cầu truy vấn dữ liệu từ các bảng để có câu trả lời, trả về tên bảng theo định dạng: true table1 table2 ... (không giải thích gì thêm).
-                - Nếu câu hỏi không cần dữ liệu từ bảng (chỉ cần kiến thức thông thường), trả về theo định dạng: false câu trả lời
-              Câu hỏi: "${question}"`,
-            },
-          ],
-          temperature: 0.2,
-        }),
-      }
-    );
-
-    const result = await deepSeekRes.json();
-    const answer =
-      result.choices?.[0]?.message?.content ?? "Không có phản hồi.";
-
-    console.log("answer: ", answer);
-
-    if (answer.startsWith("false")) {
-      const reply = answer.replace("false", "").trim();
-      messages.value.push({ from: "ai", text: reply });
-    } else if (answer.startsWith("true")) {
-      const tables = answer.replace("true", "").trim().split(" ");
-      console.log("Cần lấy data từ các bảng:", tables);
-      await handleAnswerWithTables(tables, question);
-    } else {
-      messages.value.push({ from: "ai", text: answer });
-    }
-  } catch (err) {
-    console.error(err);
-    messages.value.push({
-      from: "ai",
-      text: "Đã xảy ra lỗi khi gọi AI hoặc API Django.",
-    });
-  } finally {
-    isLoading.value = false; // 👉 End loading
-  }
-};
-
-const handleAnswerWithTables = async (tables, question) => {
+  isLoading.value = true;
   try {
     const response = await $axios.get("/api/multi-table-data/", {
-      params: { tables: tables.join(",") },
+      params: { tables: "albums_album,artists_artist,tracks_track" },
     });
 
     const tableData = response.data;
+    console.log("tableData: ", tableData);
 
     const deepSeekWithData = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -209,7 +265,7 @@ const handleAnswerWithTables = async (tables, question) => {
       text: "Đã xảy ra lỗi khi truy vấn dữ liệu hoặc gọi lại AI.",
     });
   } finally {
-    isLoading.value = false; // 👉 Kết thúc loading ở đây luôn
+    isLoading.value = false;
   }
 };
 </script>
