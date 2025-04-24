@@ -66,19 +66,18 @@ const { $axios } = useNuxtApp();
 const isLoading = ref(false);
 
 const OPENROUTER_API_KEY =
-  "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";
+  "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";
 
-const MODEL_NAME = "deepseek/deepseek-chat-v3-0324:free";
+const MODEL_NAME = "meta-llama/llama-3-8b-instruct";
+// const MODEL_NAME = "deepseek/deepseek-chat-v3-0324:free";
 // const MODEL_NAME = "deepseek-chat:free";
 // const MODEL_NAME = "mistralai/mistral-7b-instruct:free"; //nhanh ok nè mà hơi ngu
-
 // const MODEL_NAME = "google/gemini-pro:free";
 // const MODEL_NAME = "openai/gpt-3.5-turbo:free";
 // const MODEL_NAME = "huggingface/gpt2-small:free";
 // const MODEL_NAME = "anthropic/claude-instant-1:free";
 // const MODEL_NAME = "mistralai/mixtral-8x7b";
 // const MODEL_NAME = "qwen/qwen-32b-chat";
-// const MODEL_NAME = "meta-llama/llama-3-8b-instruct";
 // const MODEL_NAME = "google/gemini-1.5-flash";
 // const MODEL_NAME = "google/gemini-2.5-pro-exp-03-25:free";
 
@@ -245,6 +244,7 @@ const sendMessage2 = async () => {
               Bạn là một trợ lý chatbot AI cho 1 website nghe nhạc. 
               Nhiệm vụ của bạn là hỗ trợ trả lời các câu hỏi của người 
               sử dụng website này dựa vào dữ liệu được cung cấp.
+              Yêu cầu câu trả lời bắt buộc phải được viết bằng tiếng việt.
               Dưới đây là dữ liệu thực tế từ các bảng:\n\n
               ${JSON.stringify(tableData, null, 2)}`,
             },
