@@ -66,10 +66,10 @@ const { $axios } = useNuxtApp();
 const isLoading = ref(false);
 
 const OPENROUTER_API_KEY =
-  "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";
+  "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";
 
-// const MODEL_NAME = "deepseek-chat:free";
 const MODEL_NAME = "deepseek/deepseek-chat-v3-0324:free";
+// const MODEL_NAME = "deepseek-chat:free";
 // const MODEL_NAME = "mistralai/mistral-7b-instruct:free"; //nhanh ok nè mà hơi ngu
 
 // const MODEL_NAME = "google/gemini-pro:free";
@@ -241,7 +241,11 @@ const sendMessage2 = async () => {
           messages: [
             {
               role: "system",
-              content: `Bạn là một trợ lý dữ liệu. Dưới đây là dữ liệu thực tế từ các bảng:\n\n
+              content: `
+              Bạn là một trợ lý chatbot AI cho 1 website nghe nhạc. 
+              Nhiệm vụ của bạn là hỗ trợ trả lời các câu hỏi của người 
+              sử dụng website này dựa vào dữ liệu được cung cấp.
+              Dưới đây là dữ liệu thực tế từ các bảng:\n\n
               ${JSON.stringify(tableData, null, 2)}`,
             },
             {
