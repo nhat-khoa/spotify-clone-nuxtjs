@@ -170,6 +170,60 @@
           </div>
         </div>
       </div>
+      <div class="section__head mt-5">
+        <div class="flex-grow-1">
+          <span class="section__subtitle">Chỉ hiển thị với bạn</span>
+          <h3 class="mb-0">
+            Top <span class="text-primary">Bản nhạc hàng đầu</span>
+          </h3>
+        </div>
+        <a href="albums.html" class="btn btn-link">View All</a>
+      </div>
+      <div class="list list--lg list--order">
+        <div class="row">
+          <div class="col-xl-6" v-for="track in tracks" :key="track.id">
+            <Track :track="track" />
+          </div>
+        </div>
+      </div>
+
+      <div class="section__head mt-5">
+        <div class="flex-grow-1">
+          <span class="section__subtitle"></span>
+          <h3 class="mb-0">Playlist Công Khai</h3>
+        </div>
+        <a href="albums.html" class="btn btn-link">View All</a>
+      </div>
+      <div class="container">
+        <div class="row g-4">
+          <div
+            class="col-6 col-md-4 col-lg-3"
+            v-for="playlist in myPublicPlaylists"
+            :key="playlist.id"
+          >
+            <MyPlaylistCard :playlist="playlist" />
+          </div>
+        </div>
+      </div>
+
+      <div class="section__head mt-5">
+        <div class="flex-grow-1">
+          <span class="section__subtitle"></span>
+          <h3 class="mb-0">Đang theo dõi</h3>
+        </div>
+        <a href="albums.html" class="btn btn-link">View All</a>
+      </div>
+      <div class="container">
+        <div class="row g-4">
+          <div
+            class="col-6 col-md-4 col-lg-3"
+            v-for="artist in followedArtists"
+            :key="artist.id"
+          >
+            <Artist :artist="artist" />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -180,8 +234,8 @@ import { useUserStore } from "~/stores/user";
 import { useToast } from "vue-toastification";
 
 definePageMeta({
-  layout: 'default2'
-})
+  layout: "default2",
+});
 
 const userStore = useUserStore();
 const user = userStore.user;
@@ -236,6 +290,59 @@ const handleSubmit = async () => {
     }
   }
 };
+
+import axios from "axios";
+import Track from "~/components/Track.vue";
+import MyPlaylistCard from "@/components/MyPlaylistCard.vue";
+import Artist from "~/components/Artist.vue";
+
+const tracks = ref([]);
+
+onMounted(async () => {
+  try {
+    const response = await axios.get("http://localhost:8000/api/tracks/");
+    tracks.value = response.data.results;
+  } catch (error) {
+    console.error("Lỗi khi lấy tracks:", error);
+  }
+});
+
+const myPublicPlaylists = ref([]);
+
+onMounted(async () => {
+  try {
+    const res = await axios.get(
+      "http://localhost:8000/api/libraries/playlists/my-public-playlists/",
+      {
+        headers: {
+          Authorization: `Bearer ${user.access_token}`,
+        },
+      }
+    );
+    myPublicPlaylists.value = res.data;
+  } catch (error) {
+    console.error("Lỗi khi lấy public playlists:", error);
+  }
+});
+
+const followedArtists = ref([]);
+
+onMounted(async () => {
+  try {
+    const res = await axios.get(
+      "http://localhost:8000/api/libraries/artists/my-followed",
+      {
+        headers: {
+          Authorization: `Bearer ${user.access_token}`,
+        },
+      }
+    );
+    followedArtists.value = res.data;
+  } catch (error) {
+    console.error("Lỗi khi lấy artist followed:", error);
+  }
+});
+// console.log(user.access_token);
 </script>
 
 <style></style>
