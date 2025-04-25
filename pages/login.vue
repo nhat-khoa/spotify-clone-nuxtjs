@@ -5,7 +5,9 @@
         <div class="col-xl-5 col-lg-7 col-md-9 col-sm-11 mx-auto">
           <div class="card">
             <div class="card-body p-sm-5">
-              <div class="d-flex align-items-center justify-content-between mb-2">
+              <div
+                class="d-flex align-items-center justify-content-between mb-2"
+              >
                 <h4 class="mb-0">
                   Login to <span class="text-primary">Listen</span>
                 </h4>
@@ -28,20 +30,43 @@
               <form @submit.prevent="handleLogin">
                 <div class="mb-3">
                   <label for="email" class="form-label fw-medium">Email</label>
-                  <input type="email" id="email" class="form-control" v-model="email" required />
+                  <input
+                    type="email"
+                    id="email"
+                    class="form-control"
+                    v-model="email"
+                    required
+                  />
                 </div>
                 <div class="mb-2">
-                  <label for="password" class="form-label fw-medium">Password</label>
-                  <input type="password" id="password" class="form-control" v-model="password" required />
+                  <label for="password" class="form-label fw-medium"
+                    >Password</label
+                  >
+                  <input
+                    type="password"
+                    id="password"
+                    class="form-control"
+                    v-model="password"
+                    required
+                  />
                 </div>
                 <div class="mb-4 text-end">
-                  <a href="#" class="link-primary fw-medium">Forgot Password?</a>
+                  <a href="#" class="link-primary fw-medium"
+                    >Forgot Password?</a
+                  >
                 </div>
                 <div class="mb-5">
-                  <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center"
-                    :disabled="isLoading">
-                    <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
-                    {{ isLoading ? 'Logging in...' : 'Login' }}
+                  <button
+                    type="submit"
+                    class="btn btn-primary w-100 d-flex align-items-center justify-content-center"
+                    :disabled="isLoading"
+                  >
+                    <span
+                      v-if="isLoading"
+                      class="spinner-border spinner-border-sm me-2"
+                      role="status"
+                    ></span>
+                    {{ isLoading ? "Logging in..." : "Login" }}
                   </button>
                 </div>
               </form>
@@ -63,18 +88,19 @@
 import { useToast } from "vue-toastification";
 import Cookies from "js-cookie";
 import { useUserStore } from "~/stores/user";
-import { ref } from 'vue';
+import { ref } from "vue";
 
 definePageMeta({
   layout: "auth",
+  guest: true,
 });
 
 const { $googleSignIn, $axios } = useNuxtApp();
 const toast = useToast();
 const userStore = useUserStore();
 
-const email = ref('');
-const password = ref('');
+const email = ref("");
+const password = ref("");
 const isLoading = ref(false);
 
 const handleGoogleLogin = async () => {
@@ -105,18 +131,15 @@ async function loginWithGoogle(credential) {
       full_name: data.user.full_name,
       avatar_google_url: data.user.avatar_google_url,
       access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      premium_expired: data.user.premium_expired,
     });
 
     toast.success("Login success!");
     navigateTo("/home");
   } catch (error) {
     console.error("Error during login:", error);
-
-    if (error.response?.data) {
-      toast.error("Login failed: " + JSON.stringify(error.response.data));
-    } else {
-      toast.error("Login failed: " + error.message);
-    }
+    toast.error("Error during login: " + error);
   }
 }
 
@@ -134,8 +157,10 @@ async function handleLogin() {
       id: data.user.id,
       email: data.user.email,
       full_name: data.user.full_name,
-      avatar_google_url: data.user.avatar_google_url || data.user.avatar_url || '',
+      avatar_google_url:
+        data.user.avatar_google_url || data.user.avatar_url || "",
       access_token: data.access_token,
+      refresh_token: data.refresh_token,
     });
 
     toast.success("Login success!");

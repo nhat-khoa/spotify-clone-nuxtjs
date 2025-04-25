@@ -11,10 +11,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   const accessToken = userStore.user.access_token;
 
-  const publicPages = ["/login", "/register"];
-  if (publicPages.includes(to.path)) return;
-
-  if (!accessToken || accessToken === "") {
+  if (!accessToken || accessToken.trim() === "") {
+    if (to.meta.guest) return;
     return navigateTo("/login", { replace: true });
   }
 
@@ -24,7 +22,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     return;
   } catch (error) {
     userStore.logout();
-    console.error("Lỗi xác thực:", error);
+    console.log('user logout in auth !!!')
+    if (to.meta.guest) return;
     return navigateTo("/login", { replace: true });
   }
+
 });

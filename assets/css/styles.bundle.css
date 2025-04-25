@@ -15350,7 +15350,6 @@ html:not([dir="rtl"]) body[data-sidebar-toggle="true"] #sidebar {
   -webkit-transition: all 0.35s ease-in-out;
   transition: all 0.35s ease-in-out;
   color: #151719;
-  display: none;
 }
 #player.show {
   display: block;
