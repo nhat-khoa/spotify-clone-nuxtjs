@@ -293,6 +293,7 @@ abbr[title] {
   -webkit-text-decoration-skip-ink: none;
   text-decoration-skip-ink: none;
 }
+
 address {
   margin-bottom: 1rem;
   font-style: normal;
@@ -17270,4 +17271,8 @@ html:not([dir="rtl"]) .rtl {
 }
 [dir="rtl"] .ltr {
   display: none;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }

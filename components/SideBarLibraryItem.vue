@@ -51,8 +51,56 @@
     </div>
   </div>
 
-  <dialog ref="myDialog">
-    
+  <dialog ref="editDialog" class="edit-dialog rounded-3">
+    <div class="dialog-content p-4">
+      <div class="d-flex justify-content-between align-items-start mb-4">
+        <h3 class="fs-5 fw-bold m-0">Chỉnh sửa thông tin</h3>
+        <button class="btn-close" @click="closeDialog"></button>
+      </div>
+
+      <form @submit.prevent="saveChanges" class="d-flex flex-column gap-3">
+        <!-- Image upload -->
+        <div class="position-relative image-upload">
+          <img :src="editedImage || image" class="rounded-3" width="180" height="180" alt="Playlist cover">
+          <div class="upload-overlay rounded-3 d-flex flex-column align-items-center justify-content-center">
+            <i class="bi bi-camera-fill fs-4 mb-2"></i>
+            <span class="text-sm">Chọn ảnh</span>
+          </div>
+          <input type="file" 
+            class="position-absolute top-0 start-0 w-100 h-100 opacity-0" 
+            accept="image/*"
+            @change="handleImageUpload"
+          >
+        </div>
+
+        <!-- Name input -->
+        <div class="form-group">
+          <input 
+            type="text" 
+            class="form-control form-control-lg bg-dark text-white border-0"
+            v-model="editedName"
+            placeholder="Thêm tên"
+            required
+          >
+        </div>
+
+        <!-- Description textarea -->
+        <div class="form-group">
+          <textarea 
+            class="form-control bg-dark text-white border-0"
+            v-model="editedDescription"
+            rows="3"
+            placeholder="Thêm phần mô tả tùy chọn"
+          ></textarea>
+        </div>
+
+        <!-- Save button -->
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn text-white" @click="closeDialog">Hủy</button>
+          <button type="submit" class="btn btn-success px-4">Lưu</button>
+        </div>
+      </form>
+    </div>
   </dialog>
 
 </template>
@@ -66,9 +114,14 @@ const { $axios } = useNuxtApp();
 
 const emit = defineEmits(['clickFolder', 'refresh'])
 const myDialog = ref(null)
+const editDialog = ref(null)
 const menuVisible = ref(false);
 const menuX = ref(0);
 const menuY = ref(0);
+
+const editedName = ref('')
+const editedDescription = ref('')
+const editedImage = ref(null)
 
 const showContextMenu = (event) => {
   if (props.type === 'folder' || props.type === 'playlist') {
@@ -91,6 +144,49 @@ onBeforeUnmount(() => {
   })
 })
 
+const openDialog = () => {
+  editedName.value = props.title
+  editedDescription.value = props.subtitle
+  editedImage.value = null
+  editDialog.value.showModal()
+}
+
+const closeDialog = () => {
+  editDialog.value.close()
+}
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    editedImage.value = URL.createObjectURL(file)
+  }
+}
+
+const saveChanges = async () => {
+  if (!editedName.value) {
+    alert('Vui lòng nhập tên')
+    return
+  }
+  try {
+    const formData = new FormData()
+    formData.append('name', editedName.value)
+    formData.append('description', editedDescription.value)
+    formData.append('playlist_id', props.id)
+    
+    if (editedImage.value) {
+      // Get the file from input
+      const input = editDialog.value.querySelector('input[type="file"]')
+      formData.append('avatar_url', input.files[0])
+    }
+
+    await $axios.put(`/api/libraries/playlists/update_playlist/`, formData)
+    emit('refresh')
+    closeDialog()
+  } catch (error) {
+    console.error('Error updating playlist:', error)
+  }
+}
+
 const editItem = async () => {
   if (props.type === 'folder') {
     const name = prompt('Nhập tên thư mục', props.title)
@@ -103,8 +199,9 @@ const editItem = async () => {
     }
   }
   if (props.type === 'playlist') {
-    myDialog.value.showModal()
+    openDialog()
   }
+  menuVisible.value = false
 }
 
 const deleteItem = async () => {
@@ -236,5 +333,52 @@ const navigateToItem = () => {
 
 .library-item-meta {
   line-height: 1.2;
+}
+
+.edit-dialog {
+  border: none;
+  background: #282828;
+  color: white;
+  min-width: 320px;
+  max-width: 100%;
+}
+
+.edit-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.image-upload {
+  width: 180px;
+  height: 180px;
+  cursor: pointer;
+}
+
+.image-upload:hover .upload-overlay {
+  opacity: 1;
+}
+
+.upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.form-control {
+  background: #3E3E3E !important;
+}
+
+.form-control:focus {
+  background: #3E3E3E !important;
+  box-shadow: none;
+  border-color: #fff;
+}
+
+.btn-close {
+  filter: invert(1);
 }
 </style>

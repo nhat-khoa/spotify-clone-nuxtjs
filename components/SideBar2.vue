@@ -75,12 +75,14 @@
       <!-- Library Items -->
 
       <!-- Saved Songs -->
-      <SideBarLibraryItem v-if="!currentFolder" :title="'Bài hát đã thích'" :subtitle="`${savedTracks.length} bài hát`"
-        :image="'/images/liked-songs.jpg'" :type="'track'" :path="'/saved-songs'" />
+      <SideBarLibraryItem v-if="savedTracks.length > 0" :title="'Bài hát đã thích'"
+        :subtitle="`${savedTracks.length} bài hát`" :image="'/images/liked-songs.jpg'" :type="'track'"
+        :path="'/saved-songs'" />
 
       <!-- Saved episode -->
-      <SideBarLibraryItem v-if="!currentFolder" :title="'Các tập đã thích'" :subtitle="`${savedEpisodes.length} tập`"
-        :image="'/images/default-episode.png'" :type="'episode'" :path="'/saved-episodes'" />
+      <SideBarLibraryItem v-if="savedEpisodes.length > 0" :title="'Các tập đã thích'"
+        :subtitle="`${savedEpisodes.length} tập`" :image="'/images/default-episode.png'" :type="'episode'"
+        :path="'/saved-episodes'" />
 
       <!-- Followed Artists -->
       <SideBarLibraryItem v-for="artist in followedArtists" :key="artist.id" :title="artist.name" :subtitle="'Nghệ sĩ'"
@@ -92,16 +94,14 @@
         <!-- Folder -->
         <SideBarLibraryItem :title="folder.name" :subtitle="`${getFolderItemCount(folder)} mục`"
           :image="'/images/folder-icon6.png'" :type="'folder'" @clickFolder="navigateToFolder(folder)"
-          :folders="folderMenuItems" :id="folder.id" 
-          @refresh="refreshAll" />
+          :folders="folderMenuItems" :id="folder.id" @refresh="refreshAll" />
       </template>
 
       <!-- Root Playlists -->
       <SideBarLibraryItem v-for="playlist in playlists" :key="playlist.id" :title="playlist.name"
         :subtitle="`Danh sách phát • ${playlist.user.full_name}`"
         :image="playlist.avatar_url || '/images/default-playlist.png'" :type="'playlist'"
-        :path="`/playlist/${playlist.id}`" :folders="folderMenuItems" :id="playlist.id"
-        @refresh="refreshAll" />
+        :path="`/playlist/${playlist.id}`" :folders="folderMenuItems" :id="playlist.id" @refresh="refreshAll" />
 
       <!-- Root albums -->
       <SideBarLibraryItem v-for="album in savedAlbums" :key="album.id" :title="album.title"
@@ -120,8 +120,7 @@
         <SideBarLibraryItem v-for="playlist in currentFolder.playlists" :key="playlist.id" :title="playlist.name"
           :subtitle="`Danh sách phát • ${playlist.user.full_name}`"
           :image="playlist.avatar_url || '/images/default-playlist.png'" :type="'playlist'"
-          :path="`/playlist/${playlist.id}`" :folders="folderMenuItems" :id="playlist.id"
-          @refresh="refreshAll" />
+          :path="`/playlist/${playlist.id}`" :folders="folderMenuItems" :id="playlist.id" @refresh="refreshAll" />
         <!-- Current Folder subfolders -->
         <SideBarLibraryItem v-for="subfolder in currentFolder.subfolders" :key="subfolder.id" :title="subfolder.name"
           :subtitle="`${getFolderItemCount(subfolder)} mục`" :image="'/images/folder-icon6.png'" :type="'folder'"
@@ -137,6 +136,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useLibraryStore } from '~/stores/library';
 const { $axios } = useNuxtApp();
 
 const menuVisible = ref(false);
@@ -150,12 +150,6 @@ const showContextMenu = (event) => {
   menuX.value = event.clientX
   menuY.value = event.clientY
 }
-
-onMounted(() => {
-  document.addEventListener('click', () => {
-    menuVisible.value = false
-  })
-})
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', () => {
@@ -182,15 +176,15 @@ const mainNavItems = [
 ];
 
 // Library data
-const folders = ref([]);
-const followedArtists = ref([]);
-const playlists = ref([]);
-const savedTracks = ref([]);
-const savedEpisodes = ref([])
-const savedAlbums = ref([])
-const savedPodcasts = ref([])
-const currentFolder = ref(null)
-const folderMenuItems = ref([])
+const folders = computed(() => useLibraryStore().folders)
+const followedArtists = computed(() => useLibraryStore().followedArtists)
+const playlists = computed(() => useLibraryStore().playlists)
+const savedTracks = computed(() => useLibraryStore().savedTracks)
+const savedEpisodes = computed(() => useLibraryStore().savedEpisodes)
+const savedAlbums = computed(() => useLibraryStore().savedAlbums)
+const savedPodcasts = computed(() => useLibraryStore().savedPodcasts)
+const currentFolder = computed(() => useLibraryStore().currentFolder)
+const folderMenuItems = computed(() => useLibraryStore().folderMenuItems)
 
 // Helper function to count items in a folder
 const getFolderItemCount = (folder) => {
@@ -201,69 +195,29 @@ const getFolderItemCount = (folder) => {
 
 // Fetch library data
 const fetchLibrary = async () => {
-  try {
-    const response = await $axios.get('/api/libraries/get_library/');
-    if (response.status === 200) {
-      currentFolder.value = null
-      folderMenuItems.value = response.data.folders || [];
-      folders.value = response.data.folders || [];
-      followedArtists.value = response.data.followed_artists || [];
-      playlists.value = response.data.playlists || [];
-      savedTracks.value = response.data.saved_tracks || [];
-      savedEpisodes.value = response.data.saved_episodes || []
-      savedAlbums.value = response.data.saved_albums || []
-      savedPodcasts.value = response.data.saved_podcasts || []
-    }
-    else {
-      console.error('Status fail!');
-    }
-  } catch (error) {
-    console.error('Error fetching library:', error);
-  }
+  useLibraryStore().fetchLibrary()
 };
 
-const navigateToFolder = async (folder) => {
-  try {
-    const response = await $axios.get(`/api/libraries/folders/get_folder_by_id?folder_id=${folder.id}`);
 
-    if (response.status === 200) {
-      currentFolder.value = response.data
-      folders.value = [];
-      followedArtists.value = [];
-      playlists.value = [];
-      savedTracks.value = [];
-      savedEpisodes.value = [];
-      savedAlbums.value = [];
-      savedPodcasts.value = [];
-    }
-    else {
-      console.error('Status fail!');
-    }
-  } catch (error) {
-    console.error('Error fetching library:', error);
-  }
+onMounted(async () => {
+  document.addEventListener('click', () => {
+    menuVisible.value = false
+  })
+
+  await fetchLibrary();
+})
+
+
+const navigateToFolder = async (folder) => {
+  useLibraryStore().navigateToFolder(folder)
 };
 
 const back = async (folder) => {
-  if (!folder.parent) {
-    await fetchLibrary()
-  }
-  else {
-    await navigateToFolder({ id: folder.parent })
-  }
+  useLibraryStore().back(folder)
 }
 
 const refreshAll = async () => {
-  if (currentFolder.value) {
-    const response = await $axios.get(`/api/libraries/folders/get_folders/`);
-    if (response.status === 200) {
-      folderMenuItems.value = response.data
-    }
-    await navigateToFolder({ id: currentFolder.value.id })
-  }
-  else {
-    await fetchLibrary()
-  }
+  useLibraryStore().refreshAll()
 }
 
 const createPlaylist = async () => {
@@ -291,17 +245,9 @@ const createFolder = async () => {
   }
 }
 
-onMounted(() => {
-  fetchLibrary();
-});
 </script>
 
 <style scoped>
-
-
-
-
-
 .sidebar {
   height: 100vh;
   width: 300px;

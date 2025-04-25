@@ -40,9 +40,6 @@ export default defineNuxtPlugin((nuxtApp) => {
       const config = useRuntimeConfig();
       const originalRequest = error.config;
       const userStore = useUserStore();
-      console.log(error);
-      console.log(originalRequest);
-      console.log("in response interceptor");
       if (
         error.response?.status === 401 &&
         !originalRequest._retry &&
