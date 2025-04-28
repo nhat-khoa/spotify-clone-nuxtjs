@@ -31,6 +31,7 @@ export const useLibraryStore = defineStore("library", () => {
             const response = await $axios.get('/api/libraries/get_library/');
             currentFolder.value = null;
             folders.value = response.data.folders;
+            folderMenuItems.value = response.data.folders;
             followedArtists.value = response.data.followed_artists;
             playlists.value = response.data.playlists;
             savedTracks.value = response.data.saved_tracks;

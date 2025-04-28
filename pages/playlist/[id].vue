@@ -14,10 +14,10 @@
             >{{ playlist.is_public ? "Public" : "Private" }} Playlist</span
           >
           <h1
-            class="playlist-title "
+            class="playlist-title"
             :class="{ 'cursor-pointer': playlist.user_id == userStore.user.id }"
             @click="openDialog"
-          >
+          > 
             {{ playlist.name }}
           </h1>
           <div class="playlist-description" v-if="playlist.description">
@@ -25,10 +25,20 @@
           </div>
           <div class="playlist-details">
             <span
+              v-if="playlist.collaborators.length == 0"
               class="playlist-owner"
               @click="navigateTo(`/user/${playlist.user?.id}`)"
               >{{ playlist.user?.full_name }}</span
             >
+            <span
+              v-else
+              class="playlist-owner"
+              @click="collabDialog.showModal()"
+              >{{ playlist.user?.full_name }} &
+              {{ playlist.collaborators.length }}
+              other
+            </span>
+
             <span class="playlist-stats">
               • {{ playlist.items?.length || 0 }} items,
               {{ formatTotalDuration(getTotalDuration()) }}
@@ -40,13 +50,97 @@
                 playlist.user_id == userStore.user.id
               "
             >
-              • {{ playlist.likes_count }} likes
+              • {{ playlist.likes_count }} lượt lưu
             </span>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- collabDialog  -->
+    <dialog ref="collabDialog" class="bg-dark text-white rounded-3 border-0">
+      <div class="p-4" style="min-width: 480px">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="h5 mb-0">Những người cộng tác</h3>
+          <button
+            class="btn-close btn-close-white"
+            @click="collabDialog.close()"
+          ></button>
+        </div>
+
+        <!-- Owner -->
+        <div class="collaborator-list">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <img
+              :src="playlist.user?.avatar_url || '/images/default-avatar.png'"
+              class="rounded-circle"
+              width="40"
+              height="40"
+              :alt="playlist.user?.full_name"
+            />
+            <div class="flex-grow-1">
+              <div
+                class="fw-bold cursor-pointer"
+                @click="navigateTo(`/user/${playlist.user?.id}`)"
+              >
+                {{ playlist.user?.full_name }}
+              </div>
+              <div class="text-secondary small">Người tạo</div>
+            </div>
+          </div>
+
+          <!-- Collaborators -->
+          <div
+            v-for="collab in playlist.collaborators"
+            :key="collab.id"
+            class="d-flex align-items-center gap-3 mb-3"
+          >
+            <img
+              :src="collab.avatar_url || '/images/default-avatar.png'"
+              class="rounded-circle"
+              width="40"
+              height="40"
+              :alt="collab.full_name"
+            />
+            <div class="flex-grow-1">
+              <div
+                class="fw-bold cursor-pointer"
+                @click="navigateTo(`/user/${collab.id}`)"
+              >
+                {{ collab.full_name }}
+              </div>
+              <div class="text-secondary small">Cộng tác viên</div>
+            </div>
+            <button
+              v-if="playlist.user_id === userStore.user.id"
+              class="btn text-danger p-0 small"
+              @click="removeCollaborator(collab.id)"
+            >
+              Xóa
+            </button>
+          </div>
+        </div>
+
+        <!-- Add Collaborator Section (Only for owner) -->
+        <div v-if="playlist.user_id === userStore.user.id" class="mt-4">
+          <div class="d-flex gap-2">
+            <input
+              type="text"
+              class="form-control form-control-sm bg-dark text-white border-secondary"
+              placeholder="Email người dùng"
+              v-model="newCollaboratorEmail"
+            />
+            <button
+              class="btn btn-success btn-sm"
+              @click="addCollaboratorViaEmail"
+              :disabled="!newCollaboratorEmail"
+            >
+              Thêm
+            </button>
+          </div>
+        </div>
+      </div>
+    </dialog>
     <!-- Playlist Controls -->
     <div class="playlist-controls d-flex align-items-center">
       <button class="btn-play" @click="playAll" v-if="playlist.items?.length">
@@ -123,6 +217,19 @@
             <i class="ri-user-add-line"></i>
             <span>Mời cộng sự</span>
           </button>
+
+          <button
+            class="dropdown-item d-flex align-items-center gap-2"
+            v-if="
+              playlist.user_id != userStore.user.id &&
+              playlist.collaborators.some((c) => c.id == userStore.user.id)
+            "
+            @click="leavePlaylist"
+          >
+            <i class="ri-user-unfollow-line"></i>
+            <span>Rời playlist</span>
+          </button>
+
           <button
             class="dropdown-item d-flex align-items-center gap-2"
             @click="sharePlaylist"
@@ -158,12 +265,13 @@
             :key="element.uid"
             class="song-row list-group-item border-0 d-flex align-items-center py-2 px-3 position-relative"
             :class="{
-              'bg-dark-subtle': selectedItems.has(element.uid),
-              selected: selectedItems.has(element.uid),
             }"
             :data-uid="element.uid"
             @dblclick.stop="playSong(element)"
-            @contextmenu.prevent="showPlaylistMenu = true; showPlaylistMenuElement = element"
+            @contextmenu.prevent="
+              showPlaylistMenu = true;
+              showPlaylistMenuElement = element;
+            "
           >
             <!-- Track Number -->
             <div class="col-1 col-sm-auto me-3 text-center text-white">
@@ -189,15 +297,19 @@
               <div class="song-info overflow-hidden">
                 <div
                   class="song-name text-truncate"
-                  :class="{ 'text-success': selectedItems.has(element.uid) }"
                 >
-                  {{ element.item_name }}
+
+                
+                {{ element.item_name }}
                 </div>
                 <div
                   v-if="element.item_type === 'track'"
                   @click="navigateTo(`/artist/${element.owner_id}`)"
-                  class="song-artist text-secondary small text-truncate"
+                  class="song-artist text-secondary small text-truncate d-flex align-items-center "
                 >
+                <!-- Explicit content icon  -->
+                <i v-if="element.explicit" class="bi bi-explicit-fill me-1"></i> 
+
                   {{ element.owner_name }}
                 </div>
                 <div
@@ -238,50 +350,77 @@
 
             <!-- show only the element that click -->
             <div
-              v-if="showPlaylistMenu && showPlaylistMenuElement.uid === element.uid"
+              v-if="
+                showPlaylistMenu && showPlaylistMenuElement.uid === element.uid
+              "
               class="dropdown-menu show position-absolute"
               :style="{ top: '-200%', left: '10%', zIndex: 999 }"
             >
-              <button class="dropdown-item d-flex align-items-center gap-2" 
-              @click="addToQueue(element)">
+              <button
+                class="dropdown-item d-flex align-items-center gap-2"
+                @click="addToQueue(element)"
+              >
                 <i class="ri-add-line"></i>
                 <span>Thêm vào hàng đợi</span>
               </button>
 
-              <button class="dropdown-item d-flex align-items-center gap-2" 
-              @click="addToFavourite(element)">
-                <i class=""
-                  :class="{
-                    'ri-heart-line': !libraryStore.savedTracks.some(track => track.id === element.item_id) && !libraryStore.savedEpisodes.some(episode => episode.id === element.item_id),
-                    'ri-heart-fill text-success': libraryStore.savedTracks.some(track => track.id === element.item_id) || libraryStore.savedEpisodes.some(episode => episode.id === element.item_id)
-                  }"
-                ></i>
-                <span>Lưu vào yêu thích</span>
+              <button
+                class="dropdown-item d-flex align-items-center gap-2"
+                @click="addToFavourite(element)"
+              >
+                <template
+                  v-if="
+                    !libraryStore.savedTracks.some(
+                      (track) => track.id === element.item_id
+                    ) &&
+                    !libraryStore.savedEpisodes.some(
+                      (episode) => episode.id === element.item_id
+                    )
+                  "
+                >
+                  <i class="ri-heart-line"></i>
+                  <span v-if="element.item_type === 'track'"
+                    >Lưu vào nhạc yêu thích</span
+                  >
+                  <span v-else>Lưu vào tập yêu thích</span>
+                </template>
+                <template v-else>
+                  <i class="ri-heart-fill text-success"></i>
+                  <span v-if="element.item_type === 'track'"
+                    >Xóa khỏi nhạc yêu thích</span
+                  >
+                  <span v-else>Xóa khỏi tập yêu thích</span>
+                </template>
               </button>
 
-              
               <div class="dropdown-divider"></div>
-              
+
               <div class="dropdown-submenu">
                 <button class="dropdown-item d-flex align-items-center gap-2">
                   <i class="ri-add-circle-line"></i>
                   <span>Thêm vào danh sách phát</span>
                   <i class="ri-arrow-right-s-line ms-auto"></i>
                 </button>
-                <div class="submenu dropdown-menu show position-absolute" style="top: 0; left: 100%;">
-                  <div class="playlists-menu overflow-auto" style="max-height: 150px; overflow-y: auto;">
-                    <button 
-                      v-for="pl in filteredPlaylists" 
+                <div
+                  class="submenu dropdown-menu show position-absolute"
+                  style="top: 0; left: 100%"
+                >
+                  <div
+                    class="playlists-menu overflow-auto"
+                    style="max-height: 150px; overflow-y: auto"
+                  >
+                    <button
+                      v-for="pl in filteredPlaylists"
                       :key="pl.id"
                       class="dropdown-item d-flex align-items-center gap-2"
                       @click="addToPlaylist(element, pl.id)"
                     >
-                      <img 
-                        :src="pl.avatar_url || '/images/default-playlist.png'" 
+                      <img
+                        :src="pl.avatar_url || '/images/default-playlist.png'"
                         class="rounded"
-                        width="30" 
+                        width="30"
                         height="30"
-                      >
+                      />
                       <span class="text-truncate">{{ pl.name }}</span>
                     </button>
                   </div>
@@ -289,10 +428,48 @@
               </div>
 
               <div class="dropdown-divider"></div>
-              
-              <button class="dropdown-item d-flex align-items-center gap-2" @click="deleteItemFromPlaylist(element)">
+
+              <button
+                v-if="playlist.user_id == userStore.user.id || playlist.collaborators.some(c => c.id == userStore.user.id)"
+                class="dropdown-item d-flex align-items-center gap-2"
+                @click="deleteItemFromPlaylist(element)"
+              >
                 <i class="ri-delete-bin-line"></i>
                 <span>Xóa khỏi danh sách phát</span>
+              </button>
+
+              <button
+                class="dropdown-item d-flex align-items-center gap-2"
+                @click="
+                  element.item_type == 'track'
+                    ? navigateTo(`/album/${element.album_or_podcast_id}`)
+                    : navigateTo(`/podcast/${element.album_or_podcast_id}`)
+                "
+              >
+                <i class="ri-information-line"></i>
+                <span v-if="element.item_type == 'track'"
+                  >Xem thông tin album
+                </span>
+                <span v-else>Xem thông tin podcast</span>
+              </button>
+              <button
+                class="dropdown-item d-flex align-items-center gap-2"
+                @click="
+                  element.item_type == 'track'
+                    ? navigateTo(`/artist/${element.owner_id}`)
+                    : navigateTo(`/podcaster/${element.owner_id}`)
+                "
+              >
+                <i class="ri-user-line"></i>
+                <span>Xem thông tin nghệ sĩ</span>
+              </button>
+              <button
+                v-if="element.item_type == 'podcast_episode'"
+                class="dropdown-item d-flex align-items-center gap-2"
+                @click="navigateTo(`/episode/${element.item_id}`)"
+              >
+                <i class="ri-file-text-line"></i>
+                <span>Xem mô tả tập</span>
               </button>
             </div>
           </li>
@@ -397,9 +574,6 @@ const editedName = ref("");
 const editedDescription = ref("");
 const editDialog = ref(null);
 
-const selectedItems = ref(new Set());
-const lastSelectedIndex = ref(null);
-
 // draggable
 const listRef = ref(null);
 
@@ -427,7 +601,9 @@ onMounted(async () => {
 
   if (listRef.value) {
     new $sortable(listRef.value, {
-      disabled: playlist.value.user_id != userStore.user.id,
+      disabled:
+        playlist.value.user_id != userStore.user.id &&
+        !playlist.value.collaborators.some((c) => c.id == userStore.user.id),
       animation: 150,
       multiDrag: true,
       selectedClass: "selected",
@@ -522,8 +698,7 @@ const editPlaylist = () => {
   showMoreMenu.value = false;
 };
 const openDialog = () => {
-  if (playlist.value.user_id != userStore.user.id)
-    return;
+  if (playlist.value.user_id != userStore.user.id) return;
 
   editedName.value = playlist.value.name;
   editedDescription.value = playlist.value.description;
@@ -606,8 +781,24 @@ const togglePrivacy = async () => {
   showMoreMenu.value = false;
 };
 
-const inviteCollaborator = () => {
+const inviteCollaborator = async () => {
   // Implement invite functionality
+  const toast = useToast();
+  try {
+    await navigator.clipboard.writeText(
+      `http://localhost:3000/share/playlist/${playlist.value.id}?token=${playlist.value.share_token}`
+    );
+    toast.success("Đã copy link mời!", {
+      timeout: 1500,
+      position: "bottom-center",
+      pauseOnHover: false,
+      hideProgressBar: true,
+      icon: true,
+    });
+  } catch (err) {
+    toast.error("Không thể copy: " + err);
+  }
+
   showMoreMenu.value = false;
 };
 
@@ -648,7 +839,7 @@ const sharePlaylist = async () => {
   const toast = useToast();
   try {
     await navigator.clipboard.writeText(
-      `https://http://localhost:3000/playlist/${playlist.value.id}`
+      `http://localhost:3000/playlist/${playlist.value.id}`
     );
     toast.success("Đã copy!", {
       timeout: 1500,
@@ -668,119 +859,210 @@ const deleteItemFromPlaylist = async (item) => {
     const response = await $axios.post(
       `/api/libraries/playlists/remove_item_from_playlist/`,
       {
-          playlist_id: playlist.value.id,
-          item_uid: item.uid,
+        playlist_id: playlist.value.id,
+        item_uid: item.uid,
       }
     );
     if (response.data.status === "success") {
-      playlist.value.items= response.data.result;
+      playlist.value.items = response.data.result;
     }
   } catch (error) {
     console.error("Error deleting item from playlist:", error);
   }
 };
 
-const playlistSearchQuery = ref('')
-const libraryStore = useLibraryStore()
+const playlistSearchQuery = ref("");
+const libraryStore = useLibraryStore();
 
 // recursion
 const getAllPlaylistsFromFolders = (folders) => {
-  const playlists = []
+  const playlists = [];
   for (const folder of folders) {
-    playlists.push(...folder.playlists)
+    playlists.push(...folder.playlists);
     if (folder.subfolders.length > 0) {
-      playlists.push(...getAllPlaylistsFromFolders(folder.subfolders))
+      playlists.push(...getAllPlaylistsFromFolders(folder.subfolders));
     }
   }
-  return playlists
-}
+  return playlists;
+};
 
 // Filter playlists based on search query
 const filteredPlaylists = computed(() => {
-  return [...libraryStore.playlists, ...getAllPlaylistsFromFolders(libraryStore.folders)]
-})
+  return [
+    ...libraryStore.playlists,
+    ...getAllPlaylistsFromFolders(libraryStore.folders),
+  ].filter(p => p.user_id == userStore.user.id || p.collaborators.some(c => c.id == userStore.user.id));
+});
 
 // Add song to another playlist
 const addToPlaylist = async (item, playlistId) => {
-  const toast = useToast()
+  const toast = useToast();
   try {
-    const response = await $axios.post('/api/libraries/playlists/add_item_to_playlist/', {
-      playlist_id: playlistId,
-      item_id: item.item_id,
-      item_type: item.item_type
-    })
-    
-    if (response.data.status === 'success') {
-      toast.success('Đã thêm vào danh sách phát', {
+    const response = await $axios.post(
+      "/api/libraries/playlists/add_item_to_playlist/",
+      {
+        playlist_id: playlistId,
+        item_id: item.item_id,
+        item_type: item.item_type,
+      }
+    );
+
+    if (response.data.status === "success") {
+      toast.success("Đã thêm vào danh sách phát", {
         timeout: 1500,
-        position: 'bottom-center',
+        position: "bottom-center",
         pauseOnHover: false,
         hideProgressBar: true,
-        icon: true
-      })
-      showPlaylistMenu.value = false
+        icon: true,
+      });
+      showPlaylistMenu.value = false;
       if (playlist.value.id === playlistId)
-        playlist.value.items = response.data.result
-      else
-        libraryStore.refreshAll()
+        playlist.value.items = response.data.result;
+      else libraryStore.refreshAll();
     }
   } catch (error) {
-    console.error('Error adding to playlist:', error)
-    toast.error('Không thể thêm vào danh sách phát')
+    console.error("Error adding to playlist:", error);
+    toast.error("Không thể thêm vào danh sách phát");
   }
-}
+};
 
 // Add to queue
 const addToQueue = (item) => {
   // Implement queue functionality here
-  const toast = useToast()
-  toast.success('Đã thêm vào hàng đợi', {
+  const toast = useToast();
+  toast.success("Đã thêm vào hàng đợi", {
     timeout: 1500,
-    position: 'bottom-center',
+    position: "bottom-center",
     pauseOnHover: false,
     hideProgressBar: true,
-    icon: true
-  })
-  showPlaylistMenu.value = false
-}
+    icon: true,
+  });
+  showPlaylistMenu.value = false;
+};
 
 const addToFavourite = async (element) => {
-  let res
-  if (element.item_type === 'track') {
-    res = await $axios
-    .post(`/api/libraries/tracks/
-    ${libraryStore
-    .savedTracks
-    .some(track => track.id === element.item_id) ? 'remove_saved_track' : 'save_track'}/`, {
-      track_id: element.item_id
-    })
-
+  let res;
+  if (element.item_type === "track") {
+    res = await $axios.post(
+      `/api/libraries/tracks/${
+        libraryStore.savedTracks.some((track) => track.id === element.item_id)
+          ? "remove_saved_track"
+          : "save_track"
+      }/`,
+      {
+        track_id: element.item_id,
+      }
+    );
+  } else {
+    res = await $axios.post(
+      `/api/libraries/episodes/${
+        libraryStore.savedEpisodes.some(
+          (episode) => episode.id === element.item_id
+        )
+          ? "remove_saved_episode"
+          : "save_episode"
+      }/`,
+      {
+        episode_id: element.item_id,
+      }
+    );
   }
-  else {
-    res = await $axios
-    .post(`/api/libraries/episodes/
-    ${libraryStore
-    .savedEpisodes
-    .some(episode => episode.id === element.item_id) ? 'remove_saved_episode' : 'save_episode'}/`, {
-      episode_id: element.item_id
-    })
+
+  if (res.data.status === "success") {
+    libraryStore.refreshAll();
   }
 
-  if (res.data.status === 'success') {
-    libraryStore.refreshAll()
-  }
-
-
-  const toast = useToast()
-  toast.success('Đã thêm vào yêu thích', {
+  const toast = useToast();
+  toast.success("Đã thêm vào yêu thích", {
     timeout: 1500,
-    position: 'bottom-center',
+    position: "bottom-center",
     pauseOnHover: false,
     hideProgressBar: true,
-    icon: true
-  })
-}
+    icon: true,
+  });
+};
 
+// Collaborator part
+
+const leavePlaylist = async () => {
+  const res = await $axios.post("/api/libraries/playlists/leave_playlist/", {
+    playlist_id: playlist.value.id,
+  });
+
+  if (res.data.status === "success") {
+    fetchPlaylist();
+    const toast = useToast();
+    toast.success("Đã rời playlist", {
+      timeout: 1500,
+      position: "bottom-center",
+      pauseOnHover: false,
+      hideProgressBar: true,
+      icon: true,
+    });
+  }
+};
+
+// Collaborator dialog part
+
+const collabDialog = ref(null);
+const newCollaboratorEmail = ref("");
+
+const addCollaboratorViaEmail = async () => {
+  const toast = useToast();
+  try {
+    const response = await $axios.post(
+      "/api/libraries/playlists/add_collaborator_via_email/",
+      {
+        playlist_id: playlist.value.id,
+        email: newCollaboratorEmail.value,
+      }
+    );
+
+    if (response.data.status === "success") {
+      playlist.value = response.data.result;
+      newCollaboratorEmail.value = "";
+      toast.success("Đã thêm cộng tác viên", {
+        timeout: 1500,
+        position: "bottom-center",
+        pauseOnHover: false,
+        hideProgressBar: true,
+        icon: true,
+      });
+    }
+  } catch (error) {
+    console.error("Error adding collaborator:", error);
+    toast.error("Không thể thêm cộng tác viên");
+  }
+};
+
+const removeCollaborator = async (userId) => {
+  if (!confirm("Bạn có chắc muốn xóa cộng tác viên này?")) return;
+
+  const toast = useToast();
+  try {
+    const response = await $axios.post(
+      "/api/libraries/playlists/remove_collaborator/",
+      {
+        playlist_id: playlist.value.id,
+        user_id: userId,
+      }
+    );
+
+    if (response.data.status === "success") {
+      playlist.value = response.data.result;
+      toast.success("Đã xóa cộng tác viên", {
+        timeout: 1500,
+        position: "bottom-center",
+        pauseOnHover: false,
+        hideProgressBar: true,
+        icon: true,
+      });
+    }
+  } catch (error) {
+    console.error("Error removing collaborator:", error);
+    toast.error("Không thể xóa cộng tác viên");
+  }
+};
 </script>
 
 <style scoped>
@@ -1024,11 +1306,11 @@ const addToFavourite = async (element) => {
   box-shadow: 0 16px 24px rgba(0, 0, 0, 0.3);
 }
 
-.dropdown-submenu>.dropdown-menu {
+.dropdown-submenu > .dropdown-menu {
   display: none;
 }
 
-.dropdown-submenu:hover>.dropdown-menu {
+.dropdown-submenu:hover > .dropdown-menu {
   display: block;
 }
 
@@ -1112,6 +1394,26 @@ const addToFavourite = async (element) => {
 }
 
 .playlists-menu::-webkit-scrollbar-thumb {
+  background-color: #ffffff40;
+  border-radius: 4px;
+}
+
+.collaborator-list {
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff40 transparent;
+}
+
+.collaborator-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.collaborator-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.collaborator-list::-webkit-scrollbar-thumb {
   background-color: #ffffff40;
   border-radius: 4px;
 }

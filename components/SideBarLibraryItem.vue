@@ -26,11 +26,11 @@
   <!-- Context Menu -->
   <div v-if="menuVisible" class="dropdown-menu show position-fixed" :style="{ top: `${menuY}px`, left: `${menuX}px` }">
     <!-- Các option -->
-    <button class="dropdown-item" @click.stop="editItem">
+    <button v-if="isPlaylistOwner"  class="dropdown-item" @click.stop="editItem">
       <i class="ri-edit-line fs-5 me-2"></i>
       Chỉnh sửa
     </button>
-    <button class="dropdown-item" @click.stop="deleteItem">
+    <button v-if="isPlaylistOwner" class="dropdown-item" @click.stop="deleteItem">
       <i class="ri-delete-bin-line fs-5 me-2"></i>
       Xóa
     </button>
@@ -122,6 +122,7 @@ const menuY = ref(0);
 const editedName = ref('')
 const editedDescription = ref('')
 const editedImage = ref(null)
+const isPlaylistOwner = ref(true)
 
 const showContextMenu = (event) => {
   if (props.type === 'folder' || props.type === 'playlist') {
@@ -132,6 +133,14 @@ const showContextMenu = (event) => {
 }
 
 onMounted(() => {
+  if (props.type == "playlist") {
+    const playlist = useLibraryStore().playlists.find(p => p.id == props.id)
+    if (playlist)
+    {
+      isPlaylistOwner.value = playlist.user_id == useUserStore().user.id
+    }
+  }
+
   document.addEventListener('click', () => {
     menuVisible.value = false
   })
@@ -238,6 +247,7 @@ const moveToFolder = async (folderId) => {
       return
     })
     emit('refresh')
+
   }
 }
 
