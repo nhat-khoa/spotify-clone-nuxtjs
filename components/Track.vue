@@ -3,7 +3,7 @@
     <div class="list__cover">
       <div class="ratio ratio-1x1">
         <img
-          :src="track?.avatar_url || '/images/default-track-avatar.png'"
+          :src="track?.avatar_url || track?.album?.avatar_url || '/images/default-track-avatar.png'"
           alt="track-avatar"
         />
       </div>

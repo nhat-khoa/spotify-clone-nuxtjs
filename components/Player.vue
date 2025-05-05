@@ -24,8 +24,7 @@
             <div class="ratio ratio-1x1">
               <img
                 :src="
-                  player.currentSong?.avatar_url ||
-                  '/images/default-track-avatar.png'
+                  player.currentSong?.avatar_url || player.currentSong?.album?.avatar_url || '/images/default-track-avatar.png'
                 "
                 alt="track-avatar"
               />
@@ -163,7 +162,7 @@
               <div
                 class="playlist__head d-flex align-items-center justify-content-between"
               >
-                <h6 class="mb-0">PlayList</h6>
+                <h6 class="mb-0">Queue</h6>
               </div>
               <div id="playlist" class="list playlist__body" data-scroll="true">
                 <div
@@ -189,7 +188,7 @@
                     <div class="d-flex align-items-center">
                       <img
                         :src="
-                          track?.avatar_url ||
+                          track?.avatar_url || track?.album.avatar_url ||
                           '/images/default-track-avatar.png'
                         "
                         alt="cover"
@@ -273,7 +272,7 @@ const fetchTrackById = async (id) => {
     console.error("Lỗi fetch track:", error);
     return null;
   }
-};
+}; 
 
 async function loadlistTracks() {
   const listTrackId = player.playlist.slice();

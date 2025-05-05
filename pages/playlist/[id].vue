@@ -143,7 +143,7 @@
     </dialog>
     <!-- Playlist Controls -->
     <div class="playlist-controls d-flex align-items-center">
-      <button class="btn-play" @click="playAll" v-if="playlist.items?.length">
+      <button class="btn-play" @click="playSong(playlist.items[0],0)" v-if="playlist.items?.length">
         <i class="ri-play-fill"></i>
       </button>
       <!-- add collaborators button -->
@@ -261,13 +261,13 @@
       <div>
         <ul class="songs-list list-group" ref="listRef">
           <li
-            v-for="element in playlist.items"
+            v-for="(element, index) in playlist.items"
             :key="element.uid"
             class="song-row list-group-item border-0 d-flex align-items-center py-2 px-3 position-relative"
             :class="{
             }"
             :data-uid="element.uid"
-            @dblclick.stop="playSong(element)"
+            @dblclick.stop="playSong(element, index)"
             @contextmenu.prevent="
               showPlaylistMenu = true;
               showPlaylistMenuElement = element;
@@ -555,6 +555,7 @@ import { useUserStore } from "~/stores/user";
 import { useToast } from "vue-toastification";
 import { useLibraryStore } from "~/stores/library";
 const { $axios, $sortable } = useNuxtApp();
+const player = usePlayerStore();
 
 definePageMeta({
   layout: "default2",
@@ -644,15 +645,9 @@ onMounted(async () => {
   }
 });
 
-const playAll = () => {
-  if (playlist.value?.items?.length) {
-    playSong(playlist.value.items[0]);
-  }
-};
-
-const playSong = (song) => {
-  console.log("Playing:", song.item_name);
-  // Implement your play functionality here
+const playSong = (song, index) => {
+  const trackIds = playlist.value.items.map(t => t.item_id);
+  player.setPlaylist(trackIds, index);
 };
 
 const formatDate = (dateString) => {
@@ -1074,7 +1069,7 @@ const removeCollaborator = async (userId) => {
   position: relative;
   padding: 24px;
   margin: -24px -24px 0;
-  background-color: #c47777;
+  background-color: #d1a66d;
 }
 
 .gradient-background {
@@ -1082,15 +1077,9 @@ const removeCollaborator = async (userId) => {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    180deg,
-    var(--playlist-color) 0%,
-    rgba(202, 91, 91, 0.5) 50%,
-    #c25c5c 100%
-  );
-  opacity: 0.8;
-  transition: background 0.3s ease;
+  height: 400px;
+  background: linear-gradient(180deg, rgba(80,56,160,0.8) 0%, transparent 100%);
+  z-index: 0;
 }
 
 .playlist-header {
