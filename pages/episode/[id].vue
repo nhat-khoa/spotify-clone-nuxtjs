@@ -139,8 +139,12 @@ const formatDuration = (ms) => {
 
 // Play episode
 const playEpisode = () => {
-  playerStore.initializeQueue([episode.value]);
-  playerStore.play();
+  playerStore.setqueue([{
+    id: episode.value.id,
+    type: "podcast_episode"
+  }], 0);
+
+  
 };
 
 // Toggle save episode

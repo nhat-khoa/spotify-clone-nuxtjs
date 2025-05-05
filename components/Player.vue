@@ -23,8 +23,19 @@
           <div class="cover__image">
             <div class="ratio ratio-1x1">
               <img
+                v-if="player.currentItem?.type == 'podcast_episode'"
                 :src="
-                  player.currentSong?.avatar_url || player.currentSong?.album?.avatar_url || '/images/default-track-avatar.png'
+                  player.currentItem?.cover_art_image_url ||
+                  player.currentItem?.podcast?.cover_art_image_url ||
+                   '/images/default-podcast-avatar.png'
+                "
+                alt="podcast-avatar"
+              />
+
+              <img
+                v-else
+                :src="
+                  player.currentItem?.avatar_url || player.currentItem?.album?.avatar_url || '/images/default-track-avatar.png'
                 "
                 alt="track-avatar"
               />
@@ -32,10 +43,14 @@
           </div>
           <div class="cover__content ps-3 d-none d-sm-block">
             <a class="cover__title text-truncate">{{
-              player.currentSong?.title || "No song"
+              player.currentItem?.title || "No song"
             }}</a>
-            <a class="cover__subtitle text-truncate">
-              {{ player.currentSong?.artist.name || "Unknown" }}
+
+            <a v-if="player.currentItem?.type == 'podcast_episode'" class="cover__subtitle text-truncate">
+              {{ player.currentItem?.podcast?.podcaster?.name || "Unknown" }}
+            </a>
+            <a v-else class="cover__subtitle text-truncate">
+              {{ player.currentItem?.artist?.name || "Unknown" }}
             </a>
           </div>
         </div>
@@ -45,9 +60,16 @@
           <button
             type="button"
             class="btn btn-icon me-4 d-none d-md-block"
+            :class="{ 'text-success': player.repeatMode > 0 }"
             aria-label="Repeat"
+            @click="player.toggleRepeat"
           >
-            <i class="ri-repeat-2-fill fs-5"></i>
+            <i 
+              :class="[
+                player.repeatMode === 2 ? 'ri-repeat-one-fill' : 'ri-repeat-2-fill',
+                'fs-5'
+              ]"
+            ></i>
           </button>
 
           <button
@@ -81,7 +103,9 @@
           <button
             type="button"
             class="btn btn-icon ms-4 d-none d-md-block"
+            :class="{ 'text-success': player.isShuffled }"
             aria-label="Shuffle"
+            @click="player.toggleShuffle"
           >
             <i class="ri-shuffle-fill fs-5"></i>
           </button>
@@ -178,7 +202,7 @@
                   style="max-height: 416px"
                 >
                   <div
-                    v-for="(track, index) in listTracks"
+                    v-for="(item, index) in listTracks"
                     :key="index"
                     class="d-flex align-items-center justify-content-between py-2 px-3 border-bottom track-item"
                     :class="{ 'bg-light': player.currentIndex === index }"
@@ -187,8 +211,19 @@
                   >
                     <div class="d-flex align-items-center">
                       <img
+                      v-if="item.type == 'podcast_episode'"
                         :src="
-                          track?.avatar_url || track?.album.avatar_url ||
+                          item?.cover_art_image_url || item?.podcast.cover_art_image_url ||
+                          '/images/default-track-avatar.png'
+                        "
+                        alt="cover"
+                        class="rounded me-2"
+                        style="width: 40px; height: 40px; object-fit: cover"
+                      />
+                      <img
+                      v-else
+                        :src="
+                          item?.avatar_url || item?.album.avatar_url ||
                           '/images/default-track-avatar.png'
                         "
                         alt="cover"
@@ -197,14 +232,18 @@
                       />
                       <div>
                         <p class="mb-0 fw-bold">
-                          {{ track.title }}
+                          {{ item.title }}
                           <i
                             v-if="player.currentIndex === index"
                             class="ri-volume-up-fill text-primary ms-2"
                           ></i>
                         </p>
-                        <small class="text-muted">{{
-                          track.artist_name
+                        <small v-if="item.type == 'podcast_episode'"  class="text-muted">{{
+                          item.podcast?.podcaster?.name
+                        }}</small>
+
+                        <small v-else class="text-muted">{{
+                          item.artist.name
                         }}</small>
                       </div>
                     </div>
@@ -263,11 +302,24 @@ watch(
   { immediate: true }
 );
 
-const fetchTrackById = async (id) => {
+const fetchTrackById = async (item) => {
   const { $axios } = useNuxtApp();
+  if (!item) return null;
+  const id = item.id;
+
   try {
-    const res = await $axios.get(`/api/tracks/${id}`);
-    return res.data;
+    if (item.type == "track") {
+      const res = await $axios.get(`/api/tracks/${id}`);
+      const data = res.data;
+      data.type = "track";
+      return data;
+    }
+    else if (item.type == "podcast_episode") {
+      const res = await $axios.get(`/api/podcasts/get_episode_details/?episode_id=${id}`);
+      const data = res.data;
+      data.type = "podcast_episode";
+      return data;
+    }
   } catch (error) {
     console.error("Lỗi fetch track:", error);
     return null;
@@ -275,14 +327,17 @@ const fetchTrackById = async (id) => {
 }; 
 
 async function loadlistTracks() {
-  const listTrackId = player.playlist.slice();
-  const results = await Promise.all(listTrackId.map(fetchTrackById));
+  const items = player.getQueue()
+  const results = await Promise.all(items.map(fetchTrackById));
   listTracks.value = results.filter(Boolean); // bỏ track null nếu lỗi
 }
 
 // Tự load khi mounted hoặc khi playlist/index thay đổi
 onMounted(loadlistTracks);
-watch([() => player.currentIndex, () => player.playlist], loadlistTracks);
+watch([() => player.currentIndex,
+ () => player.queue,
+ () => player.addedQueue], 
+ loadlistTracks);
 </script>
 
 <style scoped>

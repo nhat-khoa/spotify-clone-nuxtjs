@@ -32,7 +32,7 @@
     <div class="page-controls d-flex align-items-center gap-4 mb-4 px-4">
       <button 
         class="btn-play d-flex align-items-center justify-content-center"
-        @click="playAll" 
+        @click="playSong(savedTracks[0],0)" 
         v-if="savedTracks.length"
       >
         <i class="ri-play-fill fs-3"></i>
@@ -58,7 +58,7 @@
           v-for="(track, index) in savedTracks" 
           :key="track.id"
           class="track-item d-flex align-items-center py-3 px-3 rounded position-relative"
-          @dblclick="playSong(track)"
+          @dblclick="playSong(track,index)"
         >
           <div class="col-1 text-center text-secondary">{{ index + 1 }}</div>
           <div class="col d-flex align-items-center">
@@ -189,6 +189,7 @@ const { $axios } = useNuxtApp();
 const route = useRoute();
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
+const playerStore = usePlayerStore();
 
 definePageMeta({
   layout: "default2",
@@ -215,21 +216,29 @@ const formatDuration = (ms) => {
   return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 };
 
-// Play all songs
-const playAll = () => {
-  if (savedTracks.value.length > 0) {
-    playSong(savedTracks.value[0]);
-  }
-};
-
 // Play a song
-const playSong = (track) => {
-  console.log("Playing:", track.title);
+const playSong = (track,index) => {
+  const items = savedTracks.value.map(t => ({
+    id: t.id,
+    type: "track"
+  }));
+  playerStore.setqueue(items, index);
 };
 
 // Add to queue
 const addToQueue = (track) => {
-  console.log("Added to queue:", track.title);
+  playerStore.addToQueue({
+    id: track.id,
+    type: "track"
+  });
+  const toast = useToast();
+  toast.success("Đã thêm vào hàng đợi", {
+    timeout: 1500,
+    position: "bottom-center",
+    pauseOnHover: false,
+    hideProgressBar: true,
+    icon: true,
+  });
 };
 
 // Remove from favorites

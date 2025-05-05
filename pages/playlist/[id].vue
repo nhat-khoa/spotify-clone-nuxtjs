@@ -645,9 +645,14 @@ onMounted(async () => {
   }
 });
 
-const playSong = (song, index) => {
-  const trackIds = playlist.value.items.map(t => t.item_id);
-  player.setPlaylist(trackIds, index);
+const playSong = (item, index) => {
+  if (playlist.value?.items?.length > 0) {
+    const items = playlist.value.items.map(t => ({
+      id: t.item_id,
+      type: t.item_type
+    }));
+    player.setqueue(items, index);
+  }
 };
 
 const formatDate = (dateString) => {
@@ -923,6 +928,12 @@ const addToPlaylist = async (item, playlistId) => {
 
 // Add to queue
 const addToQueue = (item) => {
+
+  player.addToQueue({
+    id: item.item_id,
+    type: item.item_type
+  });
+  
   // Implement queue functionality here
   const toast = useToast();
   toast.success("Đã thêm vào hàng đợi", {

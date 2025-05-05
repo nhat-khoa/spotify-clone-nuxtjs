@@ -376,8 +376,11 @@ const shareAlbum = async () => {
 };
 
 const playSong = async (track, index) => {
-  const trackIds = album.value.tracks.map(t => t.id);
-  player.setPlaylist(trackIds, index);
+  const items = album.value.tracks.map(t => ({
+    id: t.id,
+    type: "track"
+  }));
+  player.setqueue(items, index);
 };
 
 const addToFavourite = async (track) => {
@@ -437,7 +440,10 @@ const addToPlaylist = async (track, playlistId) => {
 };
 
 const addToQueue = async (track) => {
-  console.log("add queue");
+  playerStore.addToQueue({
+    id: track.id,
+    type: "track"
+  });
 };
 </script>
 

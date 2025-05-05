@@ -23,7 +23,7 @@
     <div class="podcast-controls d-flex align-items-center gap-4 mb-4 px-4">
       <button
         class="btn-play d-flex align-items-center justify-content-center"
-        @click="playLatestEpisode"
+        @click="playEpisode(podcast?.episodes[0], 0)"
         v-if="podcast?.episodes?.length"
       >
         <i class="ri-play-fill fs-3"></i>
@@ -150,14 +150,15 @@
     <!-- Episodes List -->
     <div class="episodes-list px-4">
       <h2 class="section-title mb-4">Tất cả tập</h2>
-
+    
       <!-- Episode Items -->
+    
       <div class="episodes-body">
         <div
-          v-for="episode in podcast?.episodes"
+          v-for="(episode, index) in podcast?.episodes"
           :key="episode.id"
           class="episode-item d-flex gap-3 p-3 rounded position-relative"
-          @dblclick="playEpisode(episode)"
+          @dblclick="playEpisode(episode, index)"
         >
           <img
             :src="
@@ -355,22 +356,24 @@ const formatDuration = (ms) => {
   return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 };
 
-// Play latest episode
-const playLatestEpisode = () => {
-  if (podcast.value?.episodes?.length > 0) {
-    playEpisode(podcast.value.episodes[0]);
-  }
-};
-
 // Play episode
-const playEpisode = (episode) => {
-  playerStore.initializeQueue([episode]);
-  playerStore.play();
+const playEpisode = (episode,index) => {
+  if (podcast.value?.episodes?.length > 0) {
+    const items = podcast.value.episodes.map(e => ({
+      id: e.id,
+      type: "podcast_episode"
+    }));
+
+    playerStore.setqueue(items, index);
+  }
 };
 
 // Add to queue
 const addToQueue = (episode) => {
-  playerStore.addToQueue(episode);
+  playerStore.addToQueue({
+    id: episode.id,
+    type: "podcast_episode"
+  });
   toast.success("Đã thêm vào hàng đợi", {
     timeout: 1500,
     position: "bottom-center",
