@@ -138,6 +138,18 @@
               />
             </div>
           </div>
+
+          <!-- show synced lyrics -->
+          <div class=" d-none d-md-block">
+            <button
+              class="btn btn-icon"
+              @click="showLyrics"
+              v-if="player.currentItem?.type === 'track'"
+            >
+              <i class="ri-quote-text fs-5"></i>
+            </button>
+          </div>
+
           <div class="dropstart d-none d-md-block">
             <button
               class="btn btn-icon"
@@ -272,6 +284,37 @@
       </div>
     </div>
   </div>
+
+  <!-- Synced Lyrics Modal -->
+  <div class="modal fade" id="lyricsModal" tabindex="-1" aria-labelledby="lyricsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header border-bottom border-secondary">
+          <h5 class="modal-title" id="lyricsModalLabel">Lyrics</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" style="height: 70vh; overflow-y: auto;">
+          <div v-if="parsedLyrics.length > 0" class="lyrics-container">
+            <div 
+              v-for="(line, index) in parsedLyrics" 
+              :key="index"
+              class="lyrics-line mb-4 text-center"
+              :class="{ 'text-success': currentLineIndex === index }"
+            >
+              <span class="fs-5 cursor-pointer  " @click="onSeek({
+                target: {
+                  value: Math.round((line.time / duration) * 100)
+                }
+              })">{{ line.text }}</span>
+            </div>
+          </div>
+          <div v-else class="text-center py-4">
+            <p class="text-muted">No lyrics available</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -289,6 +332,8 @@ const duration = ref(0);
 const progress = ref(0);
 const listTracks = ref([]);
 const trackCredits = ref(null);
+const parsedLyrics = ref([]);
+const currentLineIndex = ref(0);
 
 function formatTime(seconds) {
   const min = Math.floor(seconds / 60)
@@ -346,6 +391,36 @@ const shareItem = async () => {
   }
 };
 
+// Parse lyrics string into array of {time, text} objects
+const parseLyrics = (lyricsString) => {
+  if (!lyricsString) return [];
+  
+  return lyricsString.split('\n')
+    .map(line => {
+      const match = line.match(/\[(\d{2}):(\d{2}\.\d{2})\](.*)/);
+      if (match) {
+        const minutes = parseInt(match[1]);
+        const seconds = parseFloat(match[2]);
+        const timeInSeconds = minutes * 60 + seconds;
+        return {
+          time: timeInSeconds,
+          text: match[3].trim()
+        };
+      }
+      return null;
+    })
+    .filter(Boolean); // Remove null entries
+};
+
+const showLyrics = () => {
+  if (player.currentItem?.synced_lyrics != null) {
+    parsedLyrics.value = parseLyrics(player.currentItem.synced_lyrics);
+    const lyricsModal = new bootstrap.Modal(document.getElementById('lyricsModal'));
+    lyricsModal.show();
+  }
+};
+
+
 // Cập nhật thời gian và thanh progress mỗi khi audio phát
 watch(
   () => player.audio,
@@ -357,6 +432,13 @@ watch(
         progress.value = duration.value
           ? (audio.currentTime / audio.duration) * 100
           : 0;
+        
+        for (let i = 0; i < parsedLyrics.value?.length; i++) {
+          if (currentTime.value < parsedLyrics.value[i].time) {
+            currentLineIndex.value = i - 1;
+            break;
+          }
+        }
       };
     }
   },
@@ -407,5 +489,19 @@ watch([() => player.currentIndex,
   -webkit-appearance: slider-vertical; /* for some older browsers */
   width: 40px;
   height: 100px;
+}
+
+.lyrics-container {
+  padding: 2rem 1rem;
+}
+
+.lyrics-line {
+  transition: color 0.3s ease;
+  opacity: 0.7;
+}
+
+.lyrics-line.text-success {
+  opacity: 1;
+  font-weight: 500;
 }
 </style>

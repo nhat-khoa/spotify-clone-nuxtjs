@@ -9,7 +9,7 @@
         <slot />
       </main>
     </div>
-    <Player class="player-bar" />
+    <Player />
     <AIChatButton />
   </div>
 </template>
@@ -59,8 +59,6 @@ import Header2 from "~/components/Header2.vue";
   overflow: hidden;
 }
 
-.player-bar {
-}
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
