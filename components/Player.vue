@@ -148,26 +148,17 @@
               <i class="ri-more-2-fill fs-5"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-sm" id="player_options">
+
               <li>
-                <a class="dropdown-item" role="button" data-favorite-id="1"
-                  >Favorite</a
-                >
-              </li>
-              <li>
-                <a class="dropdown-item" role="button" data-playlist-id="1"
-                  >Add to playlist</a
-                >
-              </li>
-              <li>
-                <a class="dropdown-item" href="audio/ringtone-1.mp3" download
+                <a v-if="userStore.user.premium_expired !== null && new Date(userStore.user.premium_expired) > new Date()"  class="dropdown-item" href="audio/ringtone-1.mp3" download
                   >Download</a
                 >
               </li>
-              <li><a class="dropdown-item" role="button">Share</a></li>
+              <li><a class="dropdown-item" role="button" @click="shareItem">Share</a></li>
               <li class="dropdown-divider"></li>
               <li>
-                <a class="dropdown-item" href="song-details.html"
-                  >View details</a
+                <a class="dropdown-item" role="button" @click="showCredits"
+                  >View credit</a
                 >
               </li>
             </ul>
@@ -256,17 +247,48 @@
       </div>
     </div>
   </div>
+
+  <!-- Track Credits Dialog -->
+  <div class="modal fade" id="trackCreditsModal" tabindex="-1" aria-labelledby="trackCreditsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header border-bottom border-secondary">
+          <h5 class="modal-title" id="trackCreditsModalLabel">Track Credits</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div v-if="trackCredits">
+            <div class="mb-4" v-for="(role, index) in Object.keys(trackCredits)" :key="index">
+              <h6 class="text-muted mb-2">{{ role }}</h6>
+              <div v-for="artist in trackCredits[role]" :key="artist.id" class="d-flex align-items-center mb-2">
+                <span>{{ artist.name }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center py-4">
+            <p class="text-muted">No credits information available</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import { usePlayerStore } from "@/stores/player";
+import { useUserStore } from "@/stores/user";
+import { useToast } from "vue-toastification";
+const { $axios } = useNuxtApp();
 
+const toast = useToast();
+const userStore = useUserStore();
 const player = usePlayerStore();
 const currentTime = ref(0);
 const duration = ref(0);
 const progress = ref(0);
 const listTracks = ref([]);
+const trackCredits = ref(null);
 
 function formatTime(seconds) {
   const min = Math.floor(seconds / 60)
@@ -284,6 +306,45 @@ function onSeek(e) {
     player.audio.currentTime = (player.audio.duration * percent) / 100;
   }
 }
+
+const showCredits = async () => {
+  try {
+    const response = await $axios.get(
+      `/api/tracks/${player.currentItem.id}/get_track_artists`
+    );
+    trackCredits.value = response.data;
+    // Use Bootstrap's modal API to show the dialog
+    const modal = new bootstrap.Modal(document.getElementById('trackCreditsModal'));
+    modal.show();
+  } catch (error) {
+    console.error('Error fetching track credits:', error);
+  }
+};
+
+const shareItem = async () => {
+  try {
+    let shareUrl = '';
+    if (player.currentItem?.type === 'track') {
+      shareUrl = `${window.location.origin}/track/${player.currentItem.id}`;
+    } else if (player.currentItem?.type === 'podcast_episode') {
+      shareUrl = `${window.location.origin}/episode/${player.currentItem.id}`;
+    }
+
+    if (shareUrl) {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Đã sao chép liên kết!", {
+        timeout: 1500,
+        position: "bottom-center",
+        pauseOnHover: false,
+        hideProgressBar: true,
+        icon: true,
+      });
+    }
+  } catch (error) {
+    console.error("Error sharing:", error);
+    toast.error("Không thể sao chép liên kết");
+  }
+};
 
 // Cập nhật thời gian và thanh progress mỗi khi audio phát
 watch(

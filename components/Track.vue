@@ -88,6 +88,11 @@
 
 <script setup>
 import { useToast } from "vue-toastification";
+import { useUserStore } from "@/stores/user";
+import { usePlayerStore } from "@/stores/player";
+
+
+const userStore = useUserStore();
 
 const props = defineProps({
   track: {
@@ -119,7 +124,10 @@ const handleClickPlayTrack = async () => {
     try {
       const res = await $axios.get(`/api/profile/check-premium`);
       if (res.data.is_premium) {
-        player.setPlaylist([props.track.id]);
+        player.setqueue([{
+          id: props.track.id,
+          type: 'track'
+        }])
       } else {
         toast.info("Bạn cần tài khoản Premium để phát bài hát này.");
       }
@@ -128,7 +136,10 @@ const handleClickPlayTrack = async () => {
       toast.error("Lỗi check-premium!" + error);
     }
   } else {
-    player.setPlaylist([props.track.id]);
+    player.setqueue([{
+      id: props.track.id,
+      type: 'track'
+    }]);
   }
 };
 
