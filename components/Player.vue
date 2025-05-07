@@ -301,11 +301,8 @@
               class="lyrics-line mb-4 text-center"
               :class="{ 'text-success': currentLineIndex === index }"
             >
-              <span class="fs-5 cursor-pointer  " @click="onSeek({
-                target: {
-                  value: Math.round((line.time / duration) * 100)
-                }
-              })">{{ line.text }}</span>
+              <span class="fs-5 cursor-pointer  " 
+              @click="player.audio.currentTime = line.time">{{ line.text }}</span>
             </div>
           </div>
           <div v-else class="text-center py-4">
