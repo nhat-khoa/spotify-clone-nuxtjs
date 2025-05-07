@@ -31,7 +31,7 @@
                     : 'bg-white text-black'
                 "
                 class="d-inline-block p-2 rounded"
-                v-html="formatMessage(msg.text)"
+                v-html="msg.text"
               ></span>
             </div>
           </div>
@@ -45,9 +45,9 @@
           class="form-control bg-white"
           :placeholder="$t('AIChatButton.askAI')"
           v-model="userInput"
-          @keyup.enter="sendMessage2"
+          @keyup.enter="sendMessage3"
         />
-        <button class="btn btn-primary btn-send" @click="sendMessage2">
+        <button class="btn btn-primary btn-send" @click="sendMessage3">
           <i class="ri-send-plane-fill"></i>
         </button>
       </div>
@@ -65,10 +65,9 @@ const messages = ref([]);
 const { $axios } = useNuxtApp();
 const isLoading = ref(false);
 
-const OPENROUTER_API_KEY =
-  "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";
-
-const MODEL_NAME = "meta-llama/llama-3-8b-instruct";
+// const OPENROUTER_API_KEY =
+//   "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";
+// const MODEL_NAME = "meta-llama/llama-3-8b-instruct";
 // const MODEL_NAME = "deepseek/deepseek-chat-v3-0324:free";
 // const MODEL_NAME = "deepseek-chat:free";
 // const MODEL_NAME = "mistralai/mistral-7b-instruct:free"; //nhanh ok nè mà hơi ngu
@@ -84,13 +83,6 @@ const MODEL_NAME = "meta-llama/llama-3-8b-instruct";
 const toggleChat = () => {
   isOpen.value = !isOpen.value;
 };
-
-function formatMessage(text) {
-  // Format markdown đơn giản: **bold** và xuống dòng
-  return text
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\n/g, "<br>");
-}
 
 // const sendMessage = async () => {
 //   const question = userInput.value.trim();
@@ -211,62 +203,89 @@ function formatMessage(text) {
 //   }
 // };
 
-const sendMessage2 = async () => {
-  const question = userInput.value.trim();
-  if (!question) return;
+// const sendMessage2 = async () => {
+//   const question = userInput.value.trim();
+//   if (!question) return;
 
-  messages.value.push({ from: "user", text: question });
+//   messages.value.push({ from: "user", text: question });
+//   userInput.value = "";
+
+//   isLoading.value = true;
+//   try {
+//     const response = await $axios.get("/api/multi-table-data/", {
+//       params: { tables: "albums_album,artists_artist,tracks_track" },
+//     });
+
+//     const tableData = response.data;
+//     console.log("tableData: ", tableData);
+
+//     const deepSeekWithData = await fetch(
+//       "https://openrouter.ai/api/v1/chat/completions",
+//       {
+//         method: "POST",
+//         headers: {
+//           Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           model: MODEL_NAME,
+//           messages: [
+//             {
+//               role: "system",
+//               content: `
+//               Bạn là một trợ lý chatbot AI cho 1 website nghe nhạc.
+//               Nhiệm vụ của bạn là hỗ trợ trả lời các câu hỏi của người
+//               sử dụng website này dựa vào dữ liệu được cung cấp.
+//               Yêu cầu câu trả lời bắt buộc phải được viết bằng tiếng việt.
+//               Dưới đây là dữ liệu thực tế từ các bảng:\n\n
+//               ${JSON.stringify(tableData, null, 2)}`,
+//             },
+//             {
+//               role: "user",
+//               content: `Dựa vào dữ liệu trên, hãy trả lời câu hỏi sau: "${question}"`,
+//             },
+//           ],
+//           temperature: 0.2,
+//         }),
+//       }
+//     );
+
+//     const resultWithData = await deepSeekWithData.json();
+//     const finalAnswer =
+//       resultWithData.choices?.[0]?.message?.content ?? "Không có phản hồi.";
+//     messages.value.push({ from: "ai", text: finalAnswer });
+//   } catch (error) {
+//     console.error("Lỗi khi xử lý dữ liệu:", error);
+//     messages.value.push({
+//       from: "ai",
+//       text: "Đã xảy ra lỗi khi truy vấn dữ liệu hoặc gọi lại AI.",
+//     });
+//   } finally {
+//     isLoading.value = false;
+//   }
+// };
+
+const sendMessage3 = async () => {
+  const prompt = userInput.value.trim();
+  if (!prompt) return;
+
+  messages.value.push({ from: "user", text: prompt });
   userInput.value = "";
 
-  isLoading.value = true;
+  isLoading.value = true; // 👉 Start loading
   try {
-    const response = await $axios.get("/api/multi-table-data/", {
-      params: { tables: "albums_album,artists_artist,tracks_track" },
+    const response = await $axios.post("/api/chat-bot/", {
+      prompt,
     });
+    const answer = response.data.answer;
+    messages.value.push({ from: "ai", text: answer });
 
-    const tableData = response.data;
-    console.log("tableData: ", tableData);
-
-    const deepSeekWithData = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: MODEL_NAME,
-          messages: [
-            {
-              role: "system",
-              content: `
-              Bạn là một trợ lý chatbot AI cho 1 website nghe nhạc. 
-              Nhiệm vụ của bạn là hỗ trợ trả lời các câu hỏi của người 
-              sử dụng website này dựa vào dữ liệu được cung cấp.
-              Yêu cầu câu trả lời bắt buộc phải được viết bằng tiếng việt.
-              Dưới đây là dữ liệu thực tế từ các bảng:\n\n
-              ${JSON.stringify(tableData, null, 2)}`,
-            },
-            {
-              role: "user",
-              content: `Dựa vào dữ liệu trên, hãy trả lời câu hỏi sau: "${question}"`,
-            },
-          ],
-          temperature: 0.2,
-        }),
-      }
-    );
-
-    const resultWithData = await deepSeekWithData.json();
-    const finalAnswer =
-      resultWithData.choices?.[0]?.message?.content ?? "Không có phản hồi.";
-    messages.value.push({ from: "ai", text: finalAnswer });
+    console.log("response: ", response);
   } catch (error) {
-    console.error("Lỗi khi xử lý dữ liệu:", error);
+    console.error("Lỗi khi call api chat-bot", error);
     messages.value.push({
       from: "ai",
-      text: "Đã xảy ra lỗi khi truy vấn dữ liệu hoặc gọi lại AI.",
+      text: "Đã xảy ra lỗi!!!",
     });
   } finally {
     isLoading.value = false;
