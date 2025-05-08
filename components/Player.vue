@@ -354,6 +354,7 @@ const showCredits = async () => {
     const response = await $axios.get(
       `/api/tracks/${player.currentItem.id}/get_track_artists`
     );
+
     trackCredits.value = response.data;
     // Use Bootstrap's modal API to show the dialog
     const modal = new bootstrap.Modal(document.getElementById('trackCreditsModal'));

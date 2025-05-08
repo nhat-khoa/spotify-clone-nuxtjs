@@ -133,8 +133,10 @@ async function loginWithGoogle(credential) {
       access_token: data.access_token,
       refresh_token: data.refresh_token,
       premium_expired: data.user.premium_expired,
+      is_artist: data.user.is_artist,
+      is_podcaster: data.user.is_podcaster,
     });
-
+    console.log("userStore.user:", userStore.user);
     toast.success("Login success!");
     navigateTo("/home");
   } catch (error) {
@@ -161,8 +163,11 @@ async function handleLogin() {
         data.user.avatar_google_url || data.user.avatar_url || "",
       access_token: data.access_token,
       refresh_token: data.refresh_token,
+      premium_expired: data.user.premium_expired,
+      is_artist: data.user.is_artist,
+      is_podcaster: data.user.is_podcaster,
     });
-
+    console.log("userStore.user:", userStore.user);
     toast.success("Login success!");
     navigateTo("/home");
   } catch (error) {

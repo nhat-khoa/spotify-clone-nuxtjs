@@ -137,7 +137,8 @@ import { useToast } from 'vue-toastification';
 import { useUserStore } from '@/stores/user';
 
 definePageMeta({
-  layout: 'artist-manager'
+  layout: 'artist-manager',
+  middleware: 'is-artist'
 });
 
 const toast = useToast();

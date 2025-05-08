@@ -19,6 +19,8 @@ export const useUserStore = defineStore("user", () => {
     access_token: "",
     refresh_token: "",
     premium_expired: null,
+    is_artist: false,
+    is_podcaster: false,
   });
 
   const isLoaded = ref(false);
@@ -53,7 +55,9 @@ export const useUserStore = defineStore("user", () => {
       subscription_type: "",
       access_token: "",
       refresh_token: "",
-      premium_expired: "",
+      premium_expired: null,
+      is_artist: false,
+      is_podcaster: false,
     };
     localStorage.removeItem("user");
   };

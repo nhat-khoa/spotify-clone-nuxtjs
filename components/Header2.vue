@@ -33,8 +33,18 @@
           <i class="ri-download-2-line me-2"></i>
           Cài đặt Ứng dụng
         </button>
-        <button class="btn btn-dark rounded-circle p-1" title="Thông báo">
-          <i class="ri-notification-line fs-5"></i>
+        <!-- button điều hướng tới trang podcaster -->
+        <button v-if="useUserStore().user.is_podcaster"  class="btn btn-dark rounded-circle p-1 "
+         title="Sang trang quản lý podcast" 
+        @click="$router.push('/podcaster-manager')">
+          <i class="ri-mic-2-line"></i>
+        </button>
+
+        <!-- button điều hướng tới trang nghệ sĩ -->
+        <button v-if="useUserStore().user.is_artist"  class="btn btn-dark rounded-circle p-1"
+         title="Sang trang quản lý nghệ sĩ" 
+        @click="$router.push('/artist-manager')">
+          <i class="ri-music-2-line"></i>
         </button>
         <button 
           class="btn btn-dark rounded-circle p-1 d-flex align-items-center justify-content-center" 
@@ -52,6 +62,7 @@
 
 <script setup>
 import { useRoute } from 'vue-router'
+import { useUserStore } from '~/stores/user'
 
 const route = useRoute()
 </script>

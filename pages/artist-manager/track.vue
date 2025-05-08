@@ -231,7 +231,7 @@ const loadData = async () => {
       $axios.get('/api/artists/get_tracks'),
       $axios.get('/api/artists/get_albums')
     ]);
-    tracks.value = tracksResponse.data.result.tracks;
+    tracks.value = tracksResponse.data.result;
     albums.value = albumsResponse.data.result;
   } catch (error) {
     console.error('Error loading data:', error);

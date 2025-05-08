@@ -49,15 +49,6 @@
                 <i class="ri-image-line me-1"></i>Gallery
               </NuxtLink>
             </li>
-            <li class="nav-item">
-              <NuxtLink 
-                class="nav-link" 
-                :class="{ active: $route.path.includes('/artist-manager/profile-pick') }"
-                to="/artist-manager/profile-pick"
-              >
-                <i class="ri-star-line me-1"></i>Profile & Picks
-              </NuxtLink>
-            </li>
           </ul>
           
           <!-- User Menu -->
