@@ -186,29 +186,21 @@ let modal;
 
 onMounted(() => {
   fetchPodcast();
-  fetchEpisodes();
   modal = new bootstrap.Modal(document.getElementById('episodeModal'));
 });
 
 const fetchPodcast = async () => {
   try {
-    const response = await $axios.get(`/api/podcasts/${route.params.id}/`);
+    const response = await $axios.get(`/api/podcasts/${route.query.id}/`);
     podcast.value = response.data;
+    episodes.value = podcast.value.episodes;
   } catch (error) {
     console.error('Error fetching podcast:', error);
     toast.error('Failed to load podcast');
   }
 };
 
-const fetchEpisodes = async () => {
-  try {
-    const response = await $axios.get(`/api/podcasts/${route.params.id}/episodes/`);
-    episodes.value = response.data.results;
-  } catch (error) {
-    console.error('Error fetching episodes:', error);
-    toast.error('Failed to load episodes');
-  }
-};
+
 
 const showCreateEpisodeModal = () => {
   isEditing.value = false;
@@ -240,7 +232,7 @@ const saveEpisode = async () => {
       toast.success('Episode created successfully');
     }
     modal.hide();
-    fetchEpisodes();
+    fetchPodcast();
   } catch (error) {
     console.error('Error saving episode:', error);
     toast.error('Failed to save episode');
@@ -253,7 +245,7 @@ const deleteEpisode = async (episode) => {
   try {
     await $axios.delete(`/api/podcasts/episodes/${episode.id}/delete/`);
     toast.success('Episode deleted successfully');
-    fetchEpisodes();
+    fetchPodcast();
   } catch (error) {
     console.error('Error deleting episode:', error);
     toast.error('Failed to delete episode');
@@ -301,6 +293,7 @@ const getStatusClass = (status) => {
   height: 150px;
   overflow: hidden;
   border-radius: 8px;
+  border: 1px solid #dee2e6;
 }
 
 .podcast-image img {
@@ -310,10 +303,12 @@ const getStatusClass = (status) => {
 }
 
 .episode-item {
-  background: #282828;
+  background: #ffffff;
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .episode-image {
@@ -321,6 +316,7 @@ const getStatusClass = (status) => {
   height: 80px;
   overflow: hidden;
   border-radius: 4px;
+  border: 1px solid #dee2e6;
 }
 
 .episode-image img {
@@ -332,16 +328,17 @@ const getStatusClass = (status) => {
 .episode-title {
   font-size: 1.1rem;
   margin: 0;
+  color: #212529;
 }
 
 .episode-meta {
-  color: #b3b3b3;
+  color: #6c757d;
   font-size: 0.9rem;
   margin: 0.5rem 0;
 }
 
 .episode-description {
-  color: #b3b3b3;
+  color: #6c757d;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -350,20 +347,32 @@ const getStatusClass = (status) => {
 }
 
 .modal-content {
-  background: #282828;
-  color: white;
+  background: #ffffff;
+  color: #212529;
 }
 
 .form-control, .form-select {
-  background: #404040;
-  border-color: #404040;
-  color: white;
+  background: #ffffff;
+  border-color: #dee2e6;
+  color: #212529;
 }
 
 .form-control:focus, .form-select:focus {
-  background: #404040;
-  border-color: #404040;
-  color: white;
-  box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border-color: #86b7fe;
+  color: #212529;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.podcast-detail {
+  color: #212529;
+}
+
+.podcast-header {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 </style>

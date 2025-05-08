@@ -1,6 +1,6 @@
 <template>
   <div class="podcaster-manager">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
       <div class="container-fluid">
         <NuxtLink class="navbar-brand" to="/podcaster-manager">
           Podcaster Dashboard
@@ -43,25 +43,25 @@ definePageMeta({
 <style scoped>
 .podcaster-manager {
   min-height: 100vh;
-  background: #121212;
+  background: #f8f9fa;
 }
 
 .navbar {
   padding: 1rem;
-  background: #000000 !important;
+  background: #ffffff !important;
 }
 
 .content {
   padding: 2rem;
-  color: white;
+  color: #212529;
 }
 
 .nav-link {
-  color: #b3b3b3;
+  color: #6c757d;
   transition: color 0.2s;
 }
 
 .nav-link:hover, .nav-link.active {
-  color: white;
+  color: #0d6efd;
 }
 </style>
