@@ -12,13 +12,12 @@
     <div class="row g-4">
       <div v-for="album in albums" :key="album.id" class="col-sm-6 col-md-4 col-lg-3">
         <div class="card border-0 shadow-sm h-100">
-          <img :src="album.cover_url || '/default-album.png'" 
+          <img :src="album.avatar_url || '/default-album.png'" 
                class="card-img-top" 
                alt="Album cover"
                style="height: 200px; object-fit: cover;">
           <div class="card-body">
             <h5 class="card-title mb-1">{{ album.title }}</h5>
-            <p class="text-muted small mb-2">{{ album.release_date }}</p>
             <p class="card-text">{{ album.description }}</p>
             <div class="d-flex justify-content-between align-items-center">
               <span class="badge bg-primary">{{ album.tracks_count }} tracks</span>
@@ -53,8 +52,26 @@
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label">Release Date</label>
-                  <input v-model="albumForm.release_date" type="date" class="form-control" required>
+                  <label class="form-label">Album Type</label>
+                  <select v-model="albumForm.album_type" class="form-select">
+                    <option value="">Select Type</option>
+                    <option value="album">Album</option>
+                    <option value="single">Single</option>
+                    <option value="ep">EP</option>
+                    <option value="compilation">Compilation</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Record Label</label>
+                  <input v-model="albumForm.label" type="text" class="form-control" 
+                         placeholder="e.g., Universal Music">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Copyright</label>
+                  <input v-model="albumForm.copyright" type="text" class="form-control" 
+                         placeholder="e.g., ℗ 2025 Record Label">
                 </div>
 
                 <div class="col-12">
@@ -62,35 +79,26 @@
                   <textarea v-model="albumForm.description" class="form-control" rows="3"></textarea>
                 </div>
 
-                <div class="col-md-6">
-                  <label class="form-label">Genre</label>
-                  <select v-model="albumForm.genre" class="form-select">
-                    <option value="pop">Pop</option>
-                    <option value="rock">Rock</option>
-                    <option value="hip-hop">Hip Hop</option>
-                    <option value="electronic">Electronic</option>
-                    <option value="classical">Classical</option>
-                    <option value="jazz">Jazz</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div class="col-md-6">
-                  <label class="form-label">Type</label>
-                  <select v-model="albumForm.type" class="form-select">
-                    <option value="album">Album</option>
-                    <option value="single">Single</option>
-                    <option value="ep">EP</option>
-                  </select>
+                <!-- current image -->
+                <div class="col-12">
+                  <label class="form-label col-12">Current Image</label>
+                  <img :src="albumForm.avatar_url || '/default-album.png'" 
+                       class="img-fluid" 
+                       alt="Current Image"
+                       style="height: 200px; object-fit: cover;">
                 </div>
 
                 <div class="col-12">
-                  <label class="form-label">Cover Image</label>
-                  <input type="file" class="form-control" @change="handleCoverSelect" accept="image/*">
+                  <label class="form-label">Avatar Image</label>
+                  <input type="file" class="form-control"  accept="image/*" ref="avatarImage">
                   <small class="text-muted">Recommended size: 1000x1000px</small>
                 </div>
 
                 <div class="col-12">
+                  <div class="form-check mb-2">
+                    <input v-model="albumForm.is_public" type="checkbox" class="form-check-input" id="isPublic">
+                    <label class="form-check-label" for="isPublic">Public Album</label>
+                  </div>
                   <div class="form-check">
                     <input v-model="albumForm.is_premium" type="checkbox" class="form-check-input" id="isPremium">
                     <label class="form-check-label" for="isPremium">Premium Album</label>
@@ -128,12 +136,15 @@ const isEditing = ref(false);
 const albumForm = ref({
   title: '',
   description: '',
-  release_date: '',
-  genre: 'pop',
-  type: 'album',
+  album_type: '',
+  label: '',
+  copyright: '',
+  is_public: true,
   is_premium: false,
   cover_file: null
 });
+
+const avatarImage = ref(null);
 
 let albumModal = null;
 
@@ -144,8 +155,8 @@ onMounted(async () => {
 
 const loadAlbums = async () => {
   try {
-    const response = await $axios.get('/api/artist/albums');
-    albums.value = response.data;
+    const response = await $axios.get('/api/artists/get_albums/');
+    albums.value = response.data.result;
   } catch (error) {
     console.error('Error loading albums:', error);
     toast.error('Failed to load albums');
@@ -154,46 +165,49 @@ const loadAlbums = async () => {
 
 const showAlbumModal = (editing = false, album = null) => {
   isEditing.value = editing;
+  avatarImage.value.value ='';
   if (editing && album) {
-    albumForm.value = { ...album, cover_file: null };
+    albumForm.value = { 
+      ...album,
+      cover_file: null
+    };
   } else {
     albumForm.value = {
       title: '',
       description: '',
-      release_date: '',
-      genre: 'pop',
-      type: 'album',
+      album_type: '',
+      label: '',
+      copyright: '',
+      is_public: true,
       is_premium: false,
-      cover_file: null
     };
   }
   albumModal.show();
 };
 
-const handleCoverSelect = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    albumForm.value.cover_file = file;
-  }
-};
 
 const saveAlbum = async () => {
   try {
     const formData = new FormData();
     Object.keys(albumForm.value).forEach(key => {
-      if (key !== 'cover_file') {
+      if (key !== 'cover_art_url' 
+      && key !== 'avatar_url' 
+      && key !== 'created_at' 
+      && key !== 'updated_at' 
+      && key !== 'id' 
+      && key !== 'artist') {
         formData.append(key, albumForm.value[key]);
       }
     });
-    if (albumForm.value.cover_file) {
-      formData.append('cover', albumForm.value.cover_file);
+    if (avatarImage.value.files[0]) {
+      formData.append('avatar_url', avatarImage.value.files[0]);
     }
 
     if (isEditing.value) {
-      await $axios.put(`/api/artist/albums/${albumForm.value.id}`, formData);
+      await $axios.put(`/api/albums/${albumForm.value.id}/`, formData);
       toast.success('Album updated successfully');
     } else {
-      await $axios.post('/api/artist/albums', formData);
+      await $axios.post('/api/albums/', formData);
       toast.success('Album created successfully');
     }
 
@@ -205,11 +219,12 @@ const saveAlbum = async () => {
   }
 };
 
+
 const deleteAlbum = async (album) => {
   if (!confirm('Are you sure you want to delete this album? This will also delete all tracks in the album.')) return;
 
   try {
-    await $axios.delete(`/api/artist/albums/${album.id}`);
+    await $axios.delete(`/api/albums/${album.id}/`);
     toast.success('Album deleted successfully');
     await loadAlbums();
   } catch (error) {

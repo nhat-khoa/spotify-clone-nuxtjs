@@ -79,7 +79,6 @@
                   </select>
                 </div>
 
-                <!-- YYYY-MM-DD  -->
                 <div class="col-md-6">
                   <label class="form-label">Release Date</label>
                   <input v-model="trackForm.release_date" type="date" class="form-control">
@@ -93,6 +92,47 @@
                     <option value="fr">French</option>
                     <option value="vi">Vietnamese</option>
                   </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">ISRC Code</label>
+                  <input v-model="trackForm.isrc_code" type="text" class="form-control" 
+                         placeholder="e.g., USRC17607839">
+                  <small class="text-muted">International Standard Recording Code</small>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Record Label</label>
+                  <input v-model="trackForm.record_label" type="text" class="form-control" 
+                         placeholder="e.g., Universal Music">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Source</label>
+                  <select v-model="trackForm.source" class="form-select">
+                    <option value="original">Original Recording</option>
+                    <option value="licensed">Licensed</option>
+                    <option value="cover">Cover Version</option>
+                    <option value="remix">Remix</option>
+                    <option value="live">Live Recording</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="h-100 d-flex flex-column justify-content-center">
+                    <div class="form-check mb-2">
+                      <input v-model="trackForm.explicit" type="checkbox" class="form-check-input" id="explicit">
+                      <label class="form-check-label" for="explicit">Explicit Content</label>
+                    </div>
+                    <div class="form-check mb-2">
+                      <input v-model="trackForm.is_instrumental" type="checkbox" class="form-check-input" id="isInstrumental">
+                      <label class="form-check-label" for="isInstrumental">Instrumental Track</label>
+                    </div>
+                    <div class="form-check">
+                      <input v-model="trackForm.is_premium" type="checkbox" class="form-check-input" id="isPremium">
+                      <label class="form-check-label" for="isPremium">Premium Track</label>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="col-12">
@@ -131,12 +171,6 @@
                   accept="audio/*">
                 </div>
                 
-                <div class="col-12">
-                  <div class="form-check">
-                    <input v-model="trackForm.is_premium" type="checkbox" class="form-check-input" id="isPremium">
-                    <label class="form-check-label" for="isPremium">Premium Track</label>
-                  </div>
-                </div>
               </div>
 
               <div class="text-end mt-4">
@@ -174,7 +208,12 @@ const trackForm = ref({
   language: '',
   plain_lyrics: '',
   synced_lyrics: '',
-  is_premium: false
+  is_premium: false,
+  isrc_code: '',
+  record_label: '',
+  source: 'original',
+  explicit: false,
+  is_instrumental: false
 });
 
 const imageInput = ref(null);
@@ -215,7 +254,12 @@ const showTrackModal = (editing = false, track = null) => {
       language: '',
       plain_lyrics: '',
       synced_lyrics: '',
-      is_premium: false
+      is_premium: false,
+      isrc_code: '',
+      record_label: '',
+      source: 'original',
+      explicit: false,
+      is_instrumental: false
     };
   }
   trackModal.show();
@@ -233,6 +277,11 @@ const saveTrack = async () => {
         formData.append('synced_lyrics', trackForm.value.synced_lyrics);
         formData.append('is_premium', trackForm.value.is_premium);
         formData.append('album_id', trackForm.value.album_id || null);
+        formData.append('isrc_code', trackForm.value.isrc_code);
+        formData.append('record_label', trackForm.value.record_label);
+        formData.append('source', trackForm.value.source);
+        formData.append('explicit', trackForm.value.explicit);
+        formData.append('is_instrumental', trackForm.value.is_instrumental);
 
         const file = document.getElementById('file-input')?.files[0];   
         if (file) 
@@ -254,6 +303,11 @@ const saveTrack = async () => {
         formData.append('plain_lyrics', trackForm.value.plain_lyrics);
         formData.append('synced_lyrics', trackForm.value.synced_lyrics);
         formData.append('is_premium', trackForm.value.is_premium);
+        formData.append('isrc_code', trackForm.value.isrc_code);
+        formData.append('record_label', trackForm.value.record_label);
+        formData.append('source', trackForm.value.source);
+        formData.append('explicit', trackForm.value.is_explicit);
+        formData.append('is_instrumental', trackForm.value.is_instrumental);
 
         const file = document.getElementById('file-input').files[0];   
         if (file)
@@ -277,7 +331,7 @@ const deleteTrack = async (track) => {
   if (!confirm('Are you sure you want to delete this track?')) return;
 
   try {
-    await $axios.delete(`/api/artist/tracks/${track.id}`);
+    await $axios.delete(`/api/tracks/${track.id}/`);
     toast.success('Track deleted successfully');
     await loadData();
   } catch (error) {
