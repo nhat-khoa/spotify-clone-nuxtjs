@@ -120,7 +120,8 @@ import { ref, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
 
 definePageMeta({
-  layout: 'podcaster-manager'
+  layout: 'podcaster-manager',
+  middleware: 'is-podcaster'
 });
 
 const toast = useToast();

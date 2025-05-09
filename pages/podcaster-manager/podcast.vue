@@ -24,7 +24,7 @@
     <div class="episodes-section">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Episodes</h2>
-        <button class="btn btn-primary" @click="showCreateEpisodeModal = true">
+        <button class="btn btn-primary" @click="showCreateEpisodeModal()">
           <i class="ri-add-line me-2"></i>Add Episode
         </button>
       </div>
@@ -40,7 +40,18 @@
               </div>
             </div>
             <div class="col">
-              <h3 class="episode-title">{{ episode.title }}</h3>
+              <h3 class="episode-title">{{ episode.title }}
+
+                <span class="badge" 
+                :class=" {
+                  'bg-success': episode.type === 'full',
+                  'bg-warning': episode.type === 'bonus',
+                  'bg-danger': episode.type === 'trailer'
+                }" >
+                  {{ episode.type }}
+                </span>
+
+              </h3>
               <p class="episode-meta">
                 Season {{ episode.season }} • Episode {{ episode.episode_number }}
                 <span v-if="episode.duration_ms" class="ms-2">
@@ -51,7 +62,7 @@
             </div>
             <div class="col-auto">
               <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-light" @click="editEpisode(episode)">
+                <button class="btn btn-sm btn-outline-success" @click="editEpisode(episode)">
                   <i class="ri-edit-line me-1"></i>Edit
                 </button>
                 <button class="btn btn-sm btn-outline-danger" @click="deleteEpisode(episode)">
@@ -100,17 +111,43 @@
                 <textarea v-model="episodeForm.description" class="form-control" rows="3"></textarea>
               </div>
 
+              <!-- current audio file -->
+              <div class="row mb-3">
+                <label class="form-label col-md-3">Current Audio File</label>
+                <div class="col-md-3">
+                  <audio :src="episodeForm.audio_url" controls></audio>
+                </div>
+              </div>
+
+
+                <!-- current cover_art_image_url -->
+                <div class="row mb-3">
+                  <div class="col-md-3">
+                    <label class="form-label">Current Cover Image</label>
+                    <img :src="episodeForm.cover_art_image_url" class="img-fluid mt-2" alt="Current Cover Image"
+                    style="max-width: 150px; max-height: 150px;"
+                    >
+                  </div>
+                </div>
+
               <div class="row">
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label class="form-label">Audio File</label>
-                    <input type="file" class="form-control" @change="handleAudioUpload" accept="audio/*">
+                    <label class="form-label">Upload New Audio File</label>
+                    <input type="file"
+                    ref="audioFileInput"
+                    class="form-control" @change="handleAudioUpload" accept="audio/*">
                   </div>
                 </div>
+
+
+                
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label class="form-label">Cover Image</label>
-                    <input type="file" class="form-control" @change="handleImageUpload" accept="image/*">
+                    <label class="form-label">Upload New Cover Image</label>
+                    <input type="file" class="form-control" 
+                    ref="coverFileInput"
+                    accept="image/*">
                   </div>
                 </div>
               </div>
@@ -144,6 +181,13 @@
                 </div>
               </div>
 
+              <div class="mb-3">
+                <div class="form-check">
+                  <input v-model="episodeForm.is_featured" type="checkbox" class="form-check-input" id="featuredCheck">
+                  <label class="form-check-label" for="featuredCheck">Featured</label>
+                </div>
+              </div>
+
               <div class="text-end">
                 <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-primary">Save</button>
@@ -172,11 +216,14 @@ const { $axios } = useNuxtApp();
 const podcast = ref({});
 const episodes = ref([]);
 const isEditing = ref(false);
+const audioFileInput = ref(null);
+const coverFileInput = ref(null);
 const episodeForm = ref({
   title: '',
   description: '',
   season: 1,
   episode_number: 1,
+  is_featured: false,
   explicit: false,
   type: 'full',
   status: 'draft'
@@ -200,15 +247,16 @@ const fetchPodcast = async () => {
   }
 };
 
-
-
 const showCreateEpisodeModal = () => {
+  coverFileInput.value.value = '';
+  audioFileInput.value.value = '';
   isEditing.value = false;
   episodeForm.value = {
     title: '',
     description: '',
     season: 1,
     episode_number: 1,
+    is_featured: false,
     explicit: false,
     type: 'full',
     status: 'draft'
@@ -217,6 +265,8 @@ const showCreateEpisodeModal = () => {
 };
 
 const editEpisode = (episode) => {
+  coverFileInput.value.value = '';
+  audioFileInput.value.value = '';
   isEditing.value = true;
   episodeForm.value = { ...episode };
   modal.show();
@@ -225,10 +275,50 @@ const editEpisode = (episode) => {
 const saveEpisode = async () => {
   try {
     if (isEditing.value) {
-      await $axios.put(`/api/podcasts/episodes/${episodeForm.value.id}/update/`, episodeForm.value);
+      const formData = new FormData();
+      formData.append('episode_id', episodeForm.value.id);
+      formData.append('title', episodeForm.value.title);
+      formData.append('description', episodeForm.value.description);
+      formData.append('season', episodeForm.value.season);
+      formData.append('episode_number', episodeForm.value.episode_number);
+      formData.append('is_featured', episodeForm.value.is_featured);
+      formData.append('explicit', episodeForm.value.explicit);
+      formData.append('type', episodeForm.value.type);
+      formData.append('status', episodeForm.value.status);
+
+      if (audioFileInput.value.files[0]) {
+        formData.append('audio_url', audioFileInput.value.files[0]);
+      }
+
+      if (coverFileInput.value.files[0]) {
+        formData.append('cover_art_image_url', coverFileInput.value.files[0]);
+      }
+
+      await $axios.put("/api/podcasts/update_episode/", formData);
       toast.success('Episode updated successfully');
     } else {
-      await $axios.post(`/api/podcasts/${route.params.id}/episodes/create/`, episodeForm.value);
+
+      const formData = new FormData();
+      formData.append('episode_id', episodeForm.value.id);
+      formData.append('title', episodeForm.value.title);
+      formData.append('description', episodeForm.value.description);
+      formData.append('season', episodeForm.value.season);
+      formData.append('episode_number', episodeForm.value.episode_number);
+      formData.append('is_featured', episodeForm.value.is_featured);
+      formData.append('explicit', episodeForm.value.explicit);
+      formData.append('type', episodeForm.value.type);
+      formData.append('status', episodeForm.value.status);
+
+      if (audioFileInput.value.files[0]) {
+        formData.append('audio_url', audioFileInput.value.files[0]);
+      }
+
+      if (coverFileInput.value.files[0]) {
+        formData.append('cover_art_image_url', coverFileInput.value.files[0]);
+      }
+
+
+      await $axios.post(`/api/podcasts/${route.query.id}/create_episode/`, formData);
       toast.success('Episode created successfully');
     }
     modal.hide();
