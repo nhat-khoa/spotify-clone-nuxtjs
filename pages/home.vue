@@ -19,7 +19,7 @@
             <div class="list__item" @click="playTrack(track)">
               <div class="list__cover">
                 <img
-                  :src="track.album?.avatar_url || '/images/cover/small.jpg'"
+                  :src="track.album?.avatar_url || track.avatar_url || '/images/cover/small.jpg'"
                   :alt="track.title"
                   style="width: 100%; height: 100%; object-fit: cover"
                 />
