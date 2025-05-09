@@ -9,9 +9,6 @@
           <NuxtLink class="nav-link" to="/podcaster-manager">
             <i class="ri-home-line me-2"></i>Overview
           </NuxtLink>
-          <NuxtLink class="nav-link" to="/podcaster-manager/podcast">
-            <i class="ri-mic-line me-2"></i>Podcasts
-          </NuxtLink>
         </div>
       </div>
     </nav>
