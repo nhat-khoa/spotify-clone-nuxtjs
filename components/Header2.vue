@@ -17,6 +17,8 @@
               type="text" 
               class="form-control bg-dark border-0 text-white" 
               placeholder="Bạn muốn phát nội dung gì?"
+              v-model="searchQuery"
+              @keyup.enter="handleSearch"
             >
           </div>
         </div>
@@ -63,8 +65,21 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { useUserStore } from '~/stores/user'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const route = useRoute()
+const searchQuery = ref('');
+const router = useRouter();
+
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    router.push({
+      path: '/home',
+      query: { q: searchQuery.value.trim() }
+    });
+  }
+};
 </script>
 
 <style scoped>

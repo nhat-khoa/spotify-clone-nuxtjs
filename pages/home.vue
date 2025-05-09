@@ -323,7 +323,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useToast } from "vue-toastification";
 import { usePlayerStore } from "~/stores/player";
@@ -339,24 +339,54 @@ definePageMeta({
   layout: "default2",
 });
 
+const route = useRoute();
 const topTracks = ref([]);
 const topArtists = ref([]);
 const latestAlbums = ref([]);
 const popularPodcasts = ref([]);
+const isSearching = ref(false);
+
+// Watch for changes in the query parameter
+watch(() => route.query.q, async (newQuery) => {
+  if (newQuery) {
+    await fetchSearchResults(newQuery);
+  } else {
+    await fetchHome();
+  }
+}, {  });
 
 onMounted(async () => {
-  await Promise.all([fetchHome()]);
+  if (route.query.q) {
+    await fetchSearchResults(route.query.q);
+  } else {
+    await fetchHome();
+  }
 });
+
+const fetchSearchResults = async (query) => {
+  try {
+    isSearching.value = true;
+    const response = await $axios.get(`/api/libraries/search/?q=${encodeURIComponent(query)}`);
+    topTracks.value = response.data.tracks || [];
+    topArtists.value = response.data.artists || [];
+    latestAlbums.value = response.data.albums || [];
+    popularPodcasts.value = response.data.podcasts || [];
+  } catch (error) {
+    console.error('Error fetching search results:', error);
+  } finally {
+    isSearching.value = false;
+  }
+};
 
 const fetchHome = async () => {
   try {
-    const response = await $axios.get("/api/libraries/home/");
+    const response = await $axios.get('/api/libraries/home/');
     topTracks.value = response.data.tracks;
     topArtists.value = response.data.artists;
     latestAlbums.value = response.data.albums;
     popularPodcasts.value = response.data.podcasts;
   } catch (error) {
-    console.error("Error fetching top tracks:", error);
+    console.error('Error fetching home data:', error);
   }
 };
 

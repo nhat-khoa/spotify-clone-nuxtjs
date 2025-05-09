@@ -75,7 +75,7 @@ export const usePlayerStore = defineStore("player", () => {
     }
 
     if (item.type == "track")
-      audio.value = new Audio(currentItem.value?.audio_file_path);
+      audio.value = new Audio(currentItem.value?.audio_stream_url);
     else if (item.type == "podcast_episode")
       audio.value = new Audio(currentItem.value?.audio_url);
 
