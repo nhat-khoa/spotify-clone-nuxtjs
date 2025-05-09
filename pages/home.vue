@@ -20,8 +20,8 @@
               <div class="list__cover">
                 <img
                   :src="
-                    track.album?.avatar_url ||
                     track.avatar_url ||
+                    track.album?.avatar_url ||
                     '/images/cover/small.jpg'
                   "
                   :alt="track.title"
