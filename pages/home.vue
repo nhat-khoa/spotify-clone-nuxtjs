@@ -19,7 +19,11 @@
             <div class="list__item" @click="playTrack(track)">
               <div class="list__cover">
                 <img
-                  :src="track.album?.avatar_url || track.avatar_url || '/images/cover/small.jpg'"
+                  :src="
+                    track.album?.avatar_url ||
+                    track.avatar_url ||
+                    '/images/cover/small.jpg'
+                  "
                   :alt="track.title"
                   style="width: 100%; height: 100%; object-fit: cover"
                 />
@@ -130,7 +134,6 @@
                           <span>Xem thông tin album</span>
                         </button>
                       </li>
-
                     </ul>
                   </div>
                 </li>
@@ -390,7 +393,10 @@ const fetchHome = async () => {
   }
 };
 
-const playTrack = (track) => {
+const playTrack = async (track) => {
+  await $axios.post("/api/histories/", {
+    track_id: track.id,
+  });
   playerStore.setqueue([{ id: track.id, type: "track" }], 0);
 };
 
@@ -496,11 +502,10 @@ const toggleFavoriteArtist = async (artist) => {
   }
 };
 
-
 const addToQueue = async (track) => {
   playerStore.addToQueue({
     id: track.id,
-    type: "track"
+    type: "track",
   });
 
   toast.success("Đã thêm vào hàng đợi", {
@@ -508,10 +513,9 @@ const addToQueue = async (track) => {
     position: "bottom-center",
     pauseOnHover: false,
     hideProgressBar: true,
-    icon: true
+    icon: true,
   });
 };
-
 
 const addToFavourite = async (track) => {
   const res = await $axios.post(
@@ -591,8 +595,6 @@ const addToPlaylist = async (track, playlistId) => {
     toast.error("Không thể thêm vào danh sách phát");
   }
 };
-
-
 </script>
 
 <style scoped>
