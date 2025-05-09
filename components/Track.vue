@@ -3,7 +3,11 @@
     <div class="list__cover">
       <div class="ratio ratio-1x1">
         <img
-          :src="track?.avatar_url || track?.album?.avatar_url || '/images/default-track-avatar.png'"
+          :src="
+            track?.avatar_url ||
+            track?.album?.avatar_url ||
+            '/images/default-track-avatar.png'
+          "
           alt="track-avatar"
         />
       </div>
@@ -91,7 +95,6 @@ import { useToast } from "vue-toastification";
 import { useUserStore } from "@/stores/user";
 import { usePlayerStore } from "@/stores/player";
 
-
 const userStore = useUserStore();
 
 const props = defineProps({
@@ -124,10 +127,12 @@ const handleClickPlayTrack = async () => {
     try {
       const res = await $axios.get(`/api/profile/check-premium`);
       if (res.data.is_premium) {
-        player.setqueue([{
-          id: props.track.id,
-          type: 'track'
-        }])
+        player.setqueue([
+          {
+            id: props.track.id,
+            type: "track",
+          },
+        ]);
       } else {
         toast.info("Bạn cần tài khoản Premium để phát bài hát này.");
       }
@@ -136,10 +141,15 @@ const handleClickPlayTrack = async () => {
       toast.error("Lỗi check-premium!" + error);
     }
   } else {
-    player.setqueue([{
-      id: props.track.id,
-      type: 'track'
-    }]);
+    await $axios.post("/api/histories/", {
+      track_id: props.track.id,
+    });
+    player.setqueue([
+      {
+        id: props.track.id,
+        type: "track",
+      },
+    ]);
   }
 };
 
