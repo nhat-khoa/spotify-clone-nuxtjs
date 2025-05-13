@@ -155,22 +155,12 @@ const stats = ref({
 const recentActivity = ref([]);
 
 onMounted(async () => {
+  navigateTo('/artist-manager/track')
   await loadDashboardData();
 });
 
 const loadDashboardData = async () => {
-  try {
-    // Load stats
-    const statsResponse = await $axios.get('/api/artist/stats');
-    stats.value = statsResponse.data;
 
-    // Load recent activity
-    const activityResponse = await $axios.get('/api/artist/recent-activity');
-    recentActivity.value = activityResponse.data;
-  } catch (error) {
-    console.error('Error loading dashboard data:', error);
-    toast.error('Failed to load dashboard data');
-  }
 };
 
 const getActivityIcon = (type) => {

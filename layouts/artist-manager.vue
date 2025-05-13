@@ -13,15 +13,7 @@
 
         <div class="collapse navbar-collapse" id="artistManagerNav">
           <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-              <NuxtLink 
-                class="nav-link" 
-                :class="{ active: $route.path === '/artist-manager' }"
-                to="/artist-manager"
-              >
-                <i class="ri-dashboard-line me-1"></i>Dashboard
-              </NuxtLink>
-            </li>
+
             <li class="nav-item">
               <NuxtLink 
                 class="nav-link" 
