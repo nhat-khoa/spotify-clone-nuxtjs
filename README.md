@@ -5,8 +5,15 @@ It includes real-time interactions, Google OAuth2 authentication, multilingual s
 
 > 🔗 Backend Repo: [Django + PostgreSQL + Ollama](https://github.com/nhat-khoa/spotify-clone-backend)
 
+
+
 ---
 
+## 📽️ Video Demo
+
+👉 Watch At: [YouTube Video Demo](https://www.youtube.com/watch?v=3gcv87uj8qc)
+
+---
 ## 🚀 Key Features
 
 - 🔐 **Google OAuth2 Authentication**  
