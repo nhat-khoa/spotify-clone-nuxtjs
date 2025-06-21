@@ -54,4 +54,22 @@ It includes real-time interactions, Google OAuth2 authentication, multilingual s
 ---
 
 ## 🗂️ Project Structure
-
+```
+spotify-clone-nuxtjs/
+├── assets/ # Custom styles, fonts, etc.
+├── components/ # UI components (buttons, cards, etc.)
+├── composables/ # Reusable logic (auth, fetch, state)
+├── layouts/ # Nuxt layout system
+├── locales/ # i18n translation files (e.g., en.json, vi.json)
+├── middleware/ # Route guards (auth check, etc.)
+├── pages/ # Page components (home, profile, etc.)
+├── plugins/ # Third-party integrations
+├── public/ # Static files (images, icons, etc.)
+├── server/ # API middleware (if needed)
+├── stores/ # Pinia stores (auth, player, etc.)
+├── .env # Environment variables
+├── app.vue # Root component
+├── nuxt.config.ts # Nuxt config
+├── package.json # Project dependencies
+└── tsconfig.json # TypeScript config
+```
