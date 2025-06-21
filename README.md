@@ -3,7 +3,7 @@
 This is the **frontend** of a full-stack music streaming platform, built with **Nuxt 3**, powered by Vue 3, Pinia, Javascript, and integrated with a Django backend. 
 It includes real-time interactions, Google OAuth2 authentication, multilingual support, and drag-and-drop playlist management.
 
-> 🔗 Backend Repo: [Django + PostgreSQL + Ollama](https://github.com/nhat-khoa/spotify-clone-backend)
+> 🔗 Backend Repo: [Django + PostgreSQL + Ollama](https://github.com/nhat-khoa/spotify-clone-django)
 
 
 
