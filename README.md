@@ -73,3 +73,40 @@ spotify-clone-nuxtjs/
 ├── package.json # Project dependencies
 └── tsconfig.json # TypeScript config
 ```
+
+---
+
+## 📄 .env Configuration
+
+```env
+GOOGLE_CLIENT_ID=737867912492-rhok9ddk3cton3i5guo85ck0ak6p6aop.apps.googleusercontent.com
+API_BASE=http://localhost:8000
+```
+---
+
+## ⚙️ Getting Started
+
+```bash
+# 1. Clone the project
+git clone https://github.com/nhat-khoa/spotify-clone-nuxtjs.git
+cd spotify-clone-nuxtjs
+
+# 2. Install dependencies
+npm install
+# or
+yarn install
+
+# 3. Create .env file in root directory
+# Example:
+# GOOGLE_CLIENT_ID=your_google_client_id
+# API_BASE=http://localhost:8000
+
+# 4. Run development server
+npm run dev
+# or
+yarn dev
+
+# App will be running at:
+# http://localhost:3000
+```
+
