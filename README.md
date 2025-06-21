@@ -1,77 +1,50 @@
-Dùng vue-i18n thay vì @nuxt/i18n vì bị lỗi, nó ko đọc file vi.json trong locales mà chỉ đọc 1 file en.json
+# 🎧 Spotify Clone Frontend – Nuxt 3
 
-# Nuxt Minimal Starter
+This is the **frontend** of a full-stack music streaming platform, built with **Nuxt 3**, powered by Vue 3, Pinia, Javascript, and integrated with a Django backend. 
+It includes real-time interactions, Google OAuth2 authentication, multilingual support, and drag-and-drop playlist management.
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+> 🔗 Backend Repo: [Django + PostgreSQL + Ollama](https://github.com/nhat-khoa/spotify-clone-backend)
 
-## Setup
+---
 
-Make sure to install dependencies:
+## 🚀 Key Features
 
-```bash
-# npm
-npm install
+- 🔐 **Google OAuth2 Authentication**  
+  Login with Google using `google-one-tap` and backend verification.
 
-# pnpm
-pnpm install
+- 🔑 **JWT-Based Auth**  
+  Secure session handling with HttpOnly cookie and access token.
 
-# yarn
-yarn install
+- 🧠 **AI Chatbot Integration**  
+  Interact with a local chatbot (via Ollama) for song suggestions and help.
 
-# bun
-bun install
-```
+- 🌐 **i18n Multilingual Support**  
+  Support for multiple languages using `vue-i18n`.
 
-## Development Server
+- 🎛️ **Playlist Management**  
+  Create, reorder (drag-and-drop), and manage playlists with `vuedraggable`.
 
-Start the development server on `http://localhost:3000`:
+- 🔊 **Interactive Player**  
+  Play/pause controls, seeking, volume, repeat/shuffle logic.
 
-```bash
-# npm
-npm run dev
+- 🍪 **Session & State Management**  
+  Powered by `Pinia` and `js-cookie` for seamless auth + preferences sync.
 
-# pnpm
-pnpm dev
+---
 
-# yarn
-yarn dev
+## 🧪 Tech Stack
 
-# bun
-bun run dev
-```
+| Layer          | Stack                                                                 |
+|----------------|-----------------------------------------------------------------------|
+| **Framework**  | Nuxt 3 (Vue 3, Vite, TypeScript)                                      |
+| **State Mgmt** | Pinia, js-cookie                                                      |
+| **UI & UX**    | Floating Vue (tooltips), Vue Toastification (notices)                |
+| **Drag/Drop**  | Vuedraggable + SortableJS                                             |
+| **i18n**       | vue-i18n for language translations                                    |
+| **API Layer**  | Axios (integrated with Bearer/Token headers + interceptors)          |
+| **Auth**       | Google One Tap + Backend JWT                                          |
 
-## Production
+---
 
-Build the application for production:
+## 🗂️ Project Structure
 
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
