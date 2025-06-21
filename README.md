@@ -53,7 +53,7 @@ It includes real-time interactions, Google OAuth2 authentication, multilingual s
 
 ---
 
-## 🗂️ Project Structure
+## 🗂️ Project Structure (Simplified)
 ```
 spotify-clone-nuxtjs/
 ├── assets/ # Custom styles, fonts, etc.
