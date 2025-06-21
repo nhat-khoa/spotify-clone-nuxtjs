@@ -43,7 +43,7 @@ It includes real-time interactions, Google OAuth2 authentication, multilingual s
 
 | Layer          | Stack                                                                 |
 |----------------|-----------------------------------------------------------------------|
-| **Framework**  | Nuxt 3 (Vue 3, Vite, TypeScript)                                      |
+| **Framework**  | Nuxt 3 (Vue 3, Vite, Javascript)                                      |
 | **State Mgmt** | Pinia, js-cookie                                                      |
 | **UI & UX**    | Floating Vue (tooltips), Vue Toastification (notices)                |
 | **Drag/Drop**  | Vuedraggable + SortableJS                                             |
